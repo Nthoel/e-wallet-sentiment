@@ -11,7 +11,7 @@ if (result.error) {
 
 const dbUrl = process.env.DATABASE_URL;
 
-const { PrismaClient } = require('../src/generated/client');
+const { PrismaClient } = require('@prisma/client');
 
 const pool = new Pool({ connectionString: dbUrl });
 const adapter = new PrismaPg(pool);
