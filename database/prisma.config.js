@@ -8,9 +8,9 @@ module.exports = defineConfig({
   },
   migrations: {
     path: "./migrations",
-    seed: "node ./seeds/index.js"
+    seed: "node ./seeds/index.js",
   },
   views: {
-    path: '/views'
-  }
+    path: "/views",
+  },
 });

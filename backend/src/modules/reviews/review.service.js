@@ -1,7 +1,9 @@
-const { prisma } = require('../../../database/src');
+const { prisma } = require('../../../../database/src');
 
 const toNumberOrNull = value => {
-  if (value === null || value === undefined) return null;
+  if (value === null || value === undefined) {
+    return null;
+  }
   return Number(value);
 };
 
@@ -18,9 +20,15 @@ const getReviewsService = async query => {
   const skip = (page - 1) * limit;
 
   const where = {};
-  if (source) where.source = source;
-  if (sentiment_result) where.sentiment_result = sentiment_result;
-  if (typeof is_analyzed === 'boolean') where.is_analyzed = is_analyzed;
+  if (source) {
+    where.source = source;
+  }
+  if (sentiment_result) {
+    where.sentiment_result = sentiment_result;
+  }
+  if (typeof is_analyzed === 'boolean') {
+    where.is_analyzed = is_analyzed;
+  }
 
   const [rows, total] = await Promise.all([
     prisma.review.findMany({

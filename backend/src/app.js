@@ -1,7 +1,7 @@
 const express = require('express');
 const loggerMiddleware = require('./middlewares/logging.middleware');
 const errorHandleMiddleware = require('./middlewares/error-logger.middleware');
-const reviewRouter = require('./modules/review.router');
+const reviewRouter = require('./modules/reviews/review.router');
 const app = express();
 
 const createApp = () => {
