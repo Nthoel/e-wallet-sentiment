@@ -6,30 +6,180 @@ datasource db {
   provider = "postgresql"
 }
 
+// ENUMS
+// -------------
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum BillingPlan {
+  FREE
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum BillingStatus {
+  ACTIVE
+  INACTIVE
+  PAST_DUE
+  CANCELLED
+}
+
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+// MODELS
+// -------------
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique @db.VarChar(255)
+  username     String    @unique @db.VarChar(100)
+  passwordHash String    @db.VarChar(255)
+  role         UserRole  @default(VIEWER)
+  avatarUrl    String?
+  lastLoginAt  DateTime? @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  projects      Project[]
+  linkSources   LinkSource[]   @relation("LinkSourceCreator")
+  billings      Billing[]
+  refreshTokens RefreshToken[]
+  userTokens    UserToken[]
+
+  @@index([email])
+  @@index([role])
+  @@index([username])
+  @@map("users")
+}
+
+model Project {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  projectName String   @db.VarChar(255)
+  description String?
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  linkSources LinkSource[]
+
+  @@index([userId])
+  @@map("projects")
+}
+
+model LinkSource {
+  id            String    @id @default(uuid()) @db.Uuid
+  projectId     String    @db.Uuid
+  appName       String    @db.VarChar(100) // e.g. 'DANA', 'GoPay', 'OVO'
+  playStoreUrl  String
+  isActive      Boolean   @default(true)
+  lastCrawledAt DateTime? @db.Timestamptz(6) // Timestamp crawl terakhir berhasil
+  createdBy     String    @db.Uuid
+  createdAt     DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  creator User     @relation("LinkSourceCreator", fields: [createdBy], references: [id])
+  reviews Review[]
+
+  @@index([projectId])
+  @@index([appName])
+  @@map("link_sources")
+}
+
 model Review {
-  review_id              String    @id @db.VarChar(255)
-  user_name              String?   @db.VarChar(255)
-  user_image             String?   @db.Text
-  content                String    @db.Text
+  review_id              String      @id @db.VarChar(255)
+  user_name              String?     @db.VarChar(255)
+  user_image             String?     @db.Text
+  content                String      @db.Text
   score                  Int?
   thumbs_up_count        Int?
-  review_created_version String?   @db.VarChar(100)
-  review_datetime        DateTime? @db.Timestamp
-  reply_content          String?   @db.Text
-  replied_at             DateTime? @db.Timestamp
-  app_version            String?   @db.VarChar(100)
-
-  timestamp_unix      BigInt?
-  timestamp_formatted String? @db.VarChar(50)
-  source              String  @db.VarChar(50)
-
-  is_analyzed      Boolean? @default(false)
-  sentiment_result String?  @db.VarChar(20)
-  confidence_score Float?
-
-  created_at DateTime? @default(now()) @db.Timestamp
+  review_created_version String?     @db.VarChar(100)
+  review_datetime        DateTime?   @db.Timestamptz(6)
+  reply_content          String?     @db.Text
+  replied_at             DateTime?   @db.Timestamptz(6)
+  app_version            String?     @db.VarChar(100)
+  timestamp_unix         BigInt?
+  timestamp_formatted    String?     @db.VarChar(50)
+  source                 String      @db.VarChar(50)
+  is_analyzed            Boolean?    @default(false)
+  sentiment_result       String?     @db.VarChar(20)
+  confidence_score       Float?
+  created_at             DateTime?   @default(now()) @db.Timestamptz(6)
+  linkSource             LinkSource? @relation(fields: [linkSourceId], references: [id])
+  linkSourceId           String?     @db.Uuid
 
   @@index([is_analyzed], name: "idx_unprocessed_reviews")
   @@index([source, sentiment_result], name: "idx_source_sentiment")
   @@map("reviews")
+}
+
+model Billing {
+  id          String        @id @default(uuid()) @db.Uuid
+  userId      String        @db.Uuid
+  plan        BillingPlan   @default(FREE)
+  status      BillingStatus @default(ACTIVE)
+  billingDate DateTime?     @db.Timestamptz(6)
+  amount      Decimal?      @db.Decimal(12, 2)
+  currency    String        @default("IDR") @db.Char(3)
+  invoiceUrl  String?
+  createdAt   DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime      @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("billing")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  tokenHash  String    @unique @db.VarChar(255) // Hash SHA-256 dari token
+  deviceInfo String? // User-Agent / info perangkat
+  ipAddress  String?   @db.Inet
+  isRevoked  Boolean   @default(false)
+  expiresAt  DateTime  @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(6)
+  revokedAt  DateTime? @db.Timestamptz(6) // Diisi saat token di-revoke/logout
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([isRevoked])
+  @@map("refresh_tokens")
+}
+
+model UserToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  type      TokenType
+  tokenHash String    @unique @db.VarChar(255) // Hash SHA-256 dari token/kode
+  isUsed    Boolean   @default(false)
+  ipAddress String?   @db.Inet // IP saat token dibuat
+  expiresAt DateTime  @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  usedAt    DateTime? @db.Timestamptz(6) // Diisi saat token dikonsumsi
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([type])
+  @@index([isUsed])
+  @@map("user_tokens")
 }
