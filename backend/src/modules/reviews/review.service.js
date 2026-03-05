@@ -5,12 +5,12 @@ const { prisma } = require('e-wallet-sentiment-database');
  * @param {Object} reviewData
  * @returns {Promise<Object>}
  */
-const createReview = async (reviewData) => {
-    return await prisma.review.create({
-        data: reviewData,
-    });
+const createReview = async reviewData => {
+  return await prisma.review.create({
+    data: reviewData
+  });
 };
 
 module.exports = {
-    createReview,
+  createReview
 };
