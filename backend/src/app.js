@@ -3,6 +3,7 @@ const loggerMiddleware = require('./middlewares/logging.middleware');
 const errorHandleMiddleware = require('./middlewares/error-logger.middleware');
 const reviewRouter = require('./modules/reviews/review.router');
 const app = express();
+const reviewRouter = require('./modules/reviews/review.router');
 
 const createApp = () => {
   // MIDDLEWARE

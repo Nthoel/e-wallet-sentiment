@@ -1,4 +1,4 @@
-const { prisma } = require('../../../../database/src');
+const { prisma } = require('e-wallet-sentiment-database');
 
 const toNumberOrNull = value => {
   if (value === null || value === undefined) {
@@ -67,6 +67,14 @@ const getReviewsService = async query => {
   };
 };
 
+const createReview = async reviewData => {
+  return await prisma.review.create({
+    data: reviewData
+  });
+};
+
+
 module.exports = {
-  getReviewsService
+  getReviewsService,
+  createReview
 };
