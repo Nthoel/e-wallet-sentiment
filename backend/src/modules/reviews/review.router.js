@@ -1,5 +1,4 @@
 const express = require('express');
-const { validateGetReviewsQuery } = require('./review.validation');
 const reviewController = require('./review.controller');
 
 const router = express.Router();

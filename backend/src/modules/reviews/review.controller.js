@@ -1,6 +1,9 @@
 const { getReviewsService } = require('./review.service');
 const reviewService = require('./review.service');
-const { createReviewSchema } = require('./review.validation');
+const {
+  createReviewSchema,
+  getReviewsQuerySchema
+} = require('./review.validation');
 const ApiError = require('../../utils/api-error');
 const STATUS_CODES = require('../../utils/status-code');
 
@@ -9,7 +12,13 @@ const STATUS_CODES = require('../../utils/status-code');
  */
 const getReviewsController = async (req, res, next) => {
   try {
-    const query = req.validatedQuery || {};
+    const parsed = getReviewsQuerySchema.safeParse(req.query);
+
+    if (!parsed.success) {
+      throw ApiError.validation('Validation failed', parsed.error.format());
+    }
+
+    const query = parsed.data;
     const result = await getReviewsService(query);
 
     return res.status(STATUS_CODES.OK).json({

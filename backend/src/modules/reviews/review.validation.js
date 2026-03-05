@@ -1,9 +1,9 @@
+/* eslint-disable no-magic-numbers */
 const { z } = require('zod');
-const DEFAULT_LIMIT = 10;
 
 const getReviewsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(DEFAULT_LIMIT),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
   source: z.string().trim().min(1).optional(),
   sentiment_result: z.string().trim().min(1).optional(),
   is_analyzed: z
@@ -42,8 +42,7 @@ const createReviewSchema = z.object({
   source: z.string().max(50)
 });
 
-
 module.exports = {
-  validateGetReviewsQuery,
+  getReviewsQuerySchema,
   createReviewSchema
 };

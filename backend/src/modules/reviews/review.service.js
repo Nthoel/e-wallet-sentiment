@@ -73,7 +73,6 @@ const createReview = async reviewData => {
   });
 };
 
-
 module.exports = {
   getReviewsService,
   createReview
