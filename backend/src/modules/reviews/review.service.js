@@ -41,7 +41,7 @@ const getReviewsService = async query => {
   ]);
 
   const data = rows.map(row => ({
-    review_id: row.review_id,
+    id: row.id,
     user_name: row.user_name,
     user_image: row.user_image,
     content: row.content,

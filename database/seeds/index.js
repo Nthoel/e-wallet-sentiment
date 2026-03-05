@@ -22,7 +22,7 @@ async function main() {
 
   const sampleReviews = [
     {
-      review_id: "gp:AOqpTOE1_001",
+      id: "gp:AOqpTOE1_001",
       user_name: "Budi Santoso",
       user_image: "https://play-lh.googleusercontent.com/a/A1",
       content:
@@ -40,7 +40,7 @@ async function main() {
       is_analyzed: false,
     },
     {
-      review_id: "gp:AOqpTOE1_002",
+      id: "gp:AOqpTOE1_002",
       user_name: "Siti Aminah",
       user_image: "https://play-lh.googleusercontent.com/a/A2",
       content: "UI/UX nya simpel dan elegan, suka banget sama dark modenya.",
@@ -57,7 +57,7 @@ async function main() {
       is_analyzed: false,
     },
     {
-      review_id: "ap:12345678_003",
+      id: "ap:12345678_003",
       user_name: "Andi Wijaya",
       user_image: "https://is1-ssl.mzstatic.com/image/thumb/A3",
       content: "Sering ada promo cashback yang menarik, lumayan buat jajan.",
@@ -74,7 +74,7 @@ async function main() {
       is_analyzed: false,
     },
     {
-      review_id: "gp:AOqpTOE1_004",
+      id: "gp:AOqpTOE1_004",
       user_name: "Lestari Putri",
       user_image: "https://play-lh.googleusercontent.com/a/A4",
       content:
@@ -93,7 +93,7 @@ async function main() {
       is_analyzed: false,
     },
     {
-      review_id: "ap:12345678_005",
+      id: "ap:12345678_005",
       user_name: "Rian Hidayat",
       user_image: "https://is1-ssl.mzstatic.com/image/thumb/A5",
       content:
@@ -111,7 +111,7 @@ async function main() {
       is_analyzed: false,
     },
     {
-      review_id: "gp:AOqpTOE1_006",
+      id: "gp:AOqpTOE1_006",
       user_name: "Dewi Sartika",
       user_image: "https://play-lh.googleusercontent.com/a/A6",
       content:
@@ -129,7 +129,7 @@ async function main() {
       is_analyzed: false,
     },
     {
-      review_id: "gp:AOqpTOE1_007",
+      id: "gp:AOqpTOE1_007",
       user_name: "Fajar Ramadhan",
       user_image: "https://play-lh.googleusercontent.com/a/A7",
       content:
@@ -147,7 +147,7 @@ async function main() {
       is_analyzed: false,
     },
     {
-      review_id: "ap:12345678_008",
+      id: "ap:12345678_008",
       user_name: "Anisa Bahar",
       user_image: "https://is1-ssl.mzstatic.com/image/thumb/A8",
       content: "Verifikasi akunnya cepat, tidak sampai 24 jam sudah beres.",
@@ -164,7 +164,7 @@ async function main() {
       is_analyzed: false,
     },
     {
-      review_id: "gp:AOqpTOE1_009",
+      id: "gp:AOqpTOE1_009",
       user_name: "Bambang Pamungkas",
       user_image: "https://play-lh.googleusercontent.com/a/A9",
       content: "Kadang ada bug saat scan QRIS, tapi jarang terjadi sih.",
@@ -182,7 +182,7 @@ async function main() {
       is_analyzed: false,
     },
     {
-      review_id: "gp:AOqpTOE1_010",
+      id: "gp:AOqpTOE1_010",
       user_name: "Eka Saputra",
       user_image: "https://play-lh.googleusercontent.com/a/A10",
       content: "Sangat recommended untuk yang cari e-wallet praktis dan aman.",
@@ -202,7 +202,7 @@ async function main() {
 
   for (const data of sampleReviews) {
     const review = await prisma.review.upsert({
-      where: { review_id: data.review_id },
+      where: { id: data.id },
       update: {
         user_name: data.user_name,
         user_image: data.user_image,
@@ -220,7 +220,7 @@ async function main() {
         is_analyzed: data.is_analyzed,
       },
       create: {
-        review_id: data.review_id,
+        id: data.id,
         user_name: data.user_name,
         user_image: data.user_image,
         content: data.content,
@@ -238,7 +238,7 @@ async function main() {
         created_at: new Date(),
       },
     });
-    console.log(`Seeded review: ${review.review_id}`);
+    console.log(`Seeded review: ${review.id}`);
   }
 }
 
