@@ -80,8 +80,8 @@ pnpm prisma db seed
 ## Running
 
 ### Generate Schema (Important)
-It is important to generate the database
 
+It is important to generate the database
 
 ```bash
 # still in the backend folder
@@ -206,4 +206,3 @@ Clear cache and reinstall:
 pnpm store prune
 pnpm install
 ```
-

@@ -39,6 +39,7 @@ git checkout -b fix/deskripsi-bug
 ```
 
 **Naming Convention untuk Branch:**
+
 - `feature/nama-fitur` - untuk fitur baru
 - `fix/deskripsi-bug` - untuk perbaikan bug
 - `refactor/deskripsi` - untuk refactoring
@@ -72,6 +73,7 @@ git commit -m "fix: deskripsi bug yang diperbaiki"
 ```
 
 **Commit Message Convention:**
+
 - `feat:` - untuk fitur baru
 - `fix:` - untuk perbaikan bug
 - `docs:` - untuk dokumentasi
@@ -90,6 +92,7 @@ git push origin feature/nama-fitur
 ```
 
 **Deskripsi PR harus mencakup:**
+
 - Apa yang diubah dan mengapa
 - Permasalahan yang dipecahkan (jika ada)
 - Cara untuk menguji perubahan
@@ -135,12 +138,14 @@ backend/
 Backend menggunakan pola **MVC (Model-View-Controller)** dengan struktur modular:
 
 **Per Module:**
+
 - **Controller** - Menangani HTTP requests dan responses
 - **Service** - Business logic dan data processing
 - **Route** - Mendefinisikan endpoints
 - **Validation** - Validasi input menggunakan Zod
 
 **Example:**
+
 ```
 modules/
 └── transactions/
@@ -165,6 +170,7 @@ modules/
 Proyek ini menggunakan **ESLint** untuk code linting dan **Prettier** untuk code formatting.
 
 **Prettier Settings:**
+
 ```json
 {
   "semi": true,
@@ -190,7 +196,7 @@ const DEFAULT_TIMEOUT = 5000;
 
 // Variables, Functions - camelCase
 const userData = { name: 'John' };
-const getUserById = (userId) => {} // Gunakan Arrow Functions
+const getUserById = userId => {}; // Gunakan Arrow Functions
 
 // Classes - PascalCase
 class UserService {}
@@ -325,7 +331,7 @@ const createUserSchema = z.object({
 });
 
 // Validate di route/controller
-const validator = (schema) => (req, res, next) => {
+const validator = schema => (req, res, next) => {
   const result = schema.safeParse(req.body);
   if (!result.success) {
     return res.status(400).json({ errors: result.error.flatten() });
@@ -470,6 +476,7 @@ pnpm test:coverage
 ```
 
 Pastikan:
+
 - Semua tests **PASS** ✅
 - Jangan ada reduce di code coverage
 - Unit test coverage minimal **80%**
@@ -502,6 +509,7 @@ const apiKey = 'sk_live_1234567890';
 #### 5. ✅ Tidak Ada Unused Variables/Imports
 
 ESLint akan catch ini, pastikan:
+
 ```bash
 pnpm lint
 ```
@@ -554,6 +562,7 @@ pnpm --filter e-wallet-sentiment-database migrate:status
 ```
 
 Commit perubahan di folder:
+
 - `/database/schema.prisma`
 - `/database/migrations/`
 
@@ -588,27 +597,34 @@ Ketika buat PR, ikuti template:
 
 ```markdown
 ## Deskripsi
+
 Jelaskan apa yang diubah dan mengapa.
 
 ## Tipe Perubahan
+
 - [ ] Bug fix (perbaikan non-breaking)
 - [ ] Feature baru (non-breaking)
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Perubahan yang Dibuat
+
 - Item 1
 - Item 2
 
 ## Cara Menguji
+
 Langkah-langkah untuk test:
+
 1. ...
 2. ...
 
 ## Screenshots (jika relevan)
+
 [Add screenshots here]
 
 ## Checklist
+
 - [ ] Code linted (pnpm lint)
 - [ ] Tests pass (pnpm test)
 - [ ] Tidak ada console.log debug
@@ -715,6 +731,7 @@ Error: Can't reach database server
 ```
 
 **Solution:**
+
 ```bash
 # Verify DATABASE_URL di .env
 cat .env | grep DATABASE_URL
@@ -733,6 +750,7 @@ Error: Cannot find module
 ```
 
 **Solution:**
+
 ```bash
 # Clean install
 rm -rf node_modules pnpm-lock.yaml
@@ -752,6 +770,7 @@ Error: listen EADDRINUSE: address already in use :::3000
 ```
 
 **Solution:**
+
 ```bash
 # Find process using port 3000
 lsof -i :3000  # macOS/Linux
@@ -772,6 +791,7 @@ Linting error: conflicting rules
 ```
 
 **Solution:**
+
 ```bash
 # Format dulu
 pnpm format
@@ -787,6 +807,7 @@ Error: Migration failed
 ```
 
 **Solution:**
+
 ```bash
 # View migration status
 pnpm --filter e-wallet-sentiment-database migrate:status
@@ -812,4 +833,3 @@ Jika ada pertanyaan atau butuh bantuan:
 **Happy Coding! 🚀**
 
 Terima kasih atas kontribusi Anda untuk membuat proyek ini lebih baik!
-
