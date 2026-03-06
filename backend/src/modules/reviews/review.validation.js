@@ -14,7 +14,7 @@ const getReviewsQuerySchema = z.object({
 });
 
 const createReviewSchema = z.object({
-  review_id: z.string().max(255),
+  id: z.string().max(255),
   user_name: z.string().max(255).nullable().optional(),
   user_image: z.string().nullable().optional(),
   content: z.string(),
