@@ -8,10 +8,13 @@ const logger = require('../config/logger.config');
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} _next
  */
-const errorHandleMiddleware = (err, req, res, _next) => {
-  const statusCode = err.statusCode || err.status || 500;
+const HTTP_INTERNAL_SERVER_ERROR = 500;
+const HTTP_BAD_REQUEST = 400;
 
-  if (statusCode >= 400 && statusCode < 500) {
+const errorHandleMiddleware = (err, req, res, _next) => {
+  const statusCode = err.statusCode || err.status || HTTP_INTERNAL_SERVER_ERROR;
+
+  if (statusCode >= HTTP_BAD_REQUEST && statusCode < HTTP_INTERNAL_SERVER_ERROR) {
     // Error klien (4xx): Log sebagai warn tanpa stack trace supaya terminal tidak "berisik"
     logger.warn(`${req.method} ${req.originalUrl} - status: ${statusCode} - message: ${err.message}`);
   } else {

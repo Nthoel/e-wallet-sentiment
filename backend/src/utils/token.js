@@ -42,8 +42,9 @@ const generateRefreshToken = (user) => {
 
   // Derive expiration days for DB calculation
   // Default to 7 if parsing fails
+  const DEFAULT_REFRESH_DAYS = 7;
   const refreshExpiration = process.env.JWT_REFRESH_EXPIRATION || '7d';
-  const days = parseInt(refreshExpiration) || 7;
+  const days = parseInt(refreshExpiration) || DEFAULT_REFRESH_DAYS;
 
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + days);
