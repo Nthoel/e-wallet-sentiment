@@ -1,8 +1,9 @@
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const { prisma } = require('e-wallet-sentiment-database');
 const crypto = require('crypto');
 const ApiError = require('../../utils/api-error');
+
+const { generateAccessToken, generateRefreshToken } = require('../../utils/token');
 
 const login = async credentials => {
   const { username, email, password } = credentials;
@@ -34,45 +35,15 @@ const login = async credentials => {
     throw ApiError.unauthorized('Email/Username atau password salah');
   }
 
-  // Generate Access Token (60 minutes)
-  const accessTokenPayload = {
-    user_id: user.id,
-    role: user.role,
-    nama_user: user.username
-  };
-
-  const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
-  const accessToken = jwt.sign(accessTokenPayload, JWT_SECRET, {
-    expiresIn: process.env.JWT_ACCESS_EXPIRATION || '60m',
-    algorithm: 'HS256'
-  });
-
-  // Generate Refresh Token (7 days)
-  const refreshTokenPayload = {
-    user_id: user.id,
-    jti: crypto.randomUUID()
-  };
-
-  const JWT_REFRESH_SECRET =
-    process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret';
-  const refreshToken = jwt.sign(refreshTokenPayload, JWT_REFRESH_SECRET, {
-    expiresIn: process.env.JWT_REFRESH_EXPIRATION || '7d',
-    algorithm: 'HS256'
-  });
+  // Generate tokens using utility
+  const accessToken = generateAccessToken(user);
+  const { token: refreshToken, expiresAt } = generateRefreshToken(user);
 
   // Hash refresh token for DB storage
   const tokenHash = crypto
     .createHash('sha256')
     .update(refreshToken)
     .digest('hex');
-
-  // Calculate expiry date for DB
-  const refreshExpirationDays = parseInt(
-    process.env.JWT_REFRESH_EXPIRATION_DAYS || '7',
-    10
-  );
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + refreshExpirationDays);
 
   // Store refresh token
   await prisma.refreshToken.create({
