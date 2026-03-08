@@ -13,6 +13,8 @@ const USERS = [
     avatarUrl:
       "https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff",
     lastLoginAt: new Date("2026-03-01T08:00:00Z"),
+    isVerified: true,
+    verifiedAt: new Date("2026-01-15T12:00:00Z"),
   },
   {
     id: "00000000-0000-0000-0000-000000000002",
@@ -23,6 +25,8 @@ const USERS = [
     avatarUrl:
       "https://ui-avatars.com/api/?name=Editor&background=2ECC71&color=fff",
     lastLoginAt: new Date("2026-02-28T10:00:00Z"),
+    isVerified: true,
+    verifiedAt: new Date("2026-01-15T12:00:00Z"),
   },
   {
     id: "00000000-0000-0000-0000-000000000003",
@@ -32,6 +36,8 @@ const USERS = [
     role: "VIEWER",
     avatarUrl: null,
     lastLoginAt: null,
+    isVerified: false,
+    verifiedAt: null,
   },
   {
     id: "00000000-0000-0000-0000-000000000004",
@@ -41,6 +47,8 @@ const USERS = [
     role: "EDITOR",
     avatarUrl: null,
     lastLoginAt: null,
+    isVerified: false,
+    verifiedAt: null,
   },
 ];
 
