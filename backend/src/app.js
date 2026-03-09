@@ -3,6 +3,7 @@ const loggerMiddleware = require('./middlewares/logging.middleware');
 const errorHandleMiddleware = require('./middlewares/error-logger.middleware');
 const reviewRouter = require('./modules/reviews/review.router');
 const app = express();
+const authRouter = require('./modules/auth/auth.routes');
 
 const createApp = () => {
   // MIDDLEWARE
@@ -22,6 +23,9 @@ const createApp = () => {
 
   // Review routes
   app.use('/api/reviews', reviewRouter);
+
+  // Auth routes
+  app.use('/api/auth', authRouter);
 
   // Handle Error API
   app.use(errorHandleMiddleware);
