@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "e-wallet-sentiment-frontend",
   "version": "0.1.0",
   "private": true,
@@ -8,5 +8,16 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^7.0.1",
+    "next": "^16.1.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^3.4.4"
   }
 }
