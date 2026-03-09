@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const { prisma } = require('e-wallet-sentiment-database');
 const crypto = require('crypto');
 const ApiError = require('../../utils/api-error');
+
 const {
   generateAccessToken,
   generateRefreshToken
