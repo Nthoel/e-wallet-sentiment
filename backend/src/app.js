@@ -2,6 +2,7 @@ const express = require('express');
 const loggerMiddleware = require('./middlewares/logging.middleware');
 const errorHandleMiddleware = require('./middlewares/error-logger.middleware');
 const reviewRouter = require('./modules/reviews/review.router');
+const authRouter = require('./modules/auth/auth.routes');
 const app = express();
 
 const createApp = () => {
@@ -19,6 +20,10 @@ const createApp = () => {
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', service: 'e-wallet-sentiment-backend' });
   });
+
+  // Auth routes
+  app.use('/api/auth', authRouter);
+  app.use('/auth', authRouter);
 
   // Review routes
   app.use('/api/reviews', reviewRouter);
