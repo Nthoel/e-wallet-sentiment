@@ -1,9 +1,13 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const { prisma } = require('e-wallet-sentiment-database');
 const crypto = require('crypto');
 const ApiError = require('../../utils/api-error');
+const {
+  generateAccessToken,
+  generateRefreshToken
+} = require('../../utils/token');
 
-const { generateAccessToken, generateRefreshToken } = require('../../utils/token');
+const SALT_ROUNDS = 10;
 
 const login = async credentials => {
   const { username, email, password } = credentials;
@@ -61,6 +65,34 @@ const login = async credentials => {
   };
 };
 
+const register = async ({ username, email, password }) => {
+  const existingEmail = await prisma.user.findUnique({ where: { email } });
+  if (existingEmail) {
+    throw ApiError.conflict('Email already registered');
+  }
+
+  const existingUsername = await prisma.user.findUnique({
+    where: { username }
+  });
+  if (existingUsername) {
+    throw ApiError.conflict('Username already taken');
+  }
+
+  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+
+  await prisma.user.create({
+    data: {
+      id: crypto.randomUUID(),
+      email,
+      username,
+      passwordHash
+    }
+  });
+
+  return { success: true };
+};
+
 module.exports = {
-  login
+  login,
+  register
 };

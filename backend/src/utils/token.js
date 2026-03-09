@@ -6,7 +6,7 @@ const crypto = require('crypto');
  * @param {Object} user User object
  * @returns {string} Access token
  */
-const generateAccessToken = (user) => {
+const generateAccessToken = user => {
   const payload = {
     user_id: user.id,
     role: user.role,
@@ -24,7 +24,7 @@ const generateAccessToken = (user) => {
  * @param {Object} user User object
  * @returns {Object} Object containing token and expiresAt date
  */
-const generateRefreshToken = (user) => {
+const generateRefreshToken = user => {
   const jti = crypto.randomUUID();
   const payload = {
     user_id: user.id,

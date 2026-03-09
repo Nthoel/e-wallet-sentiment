@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@prisma/client": "^7.4.1",
-    "bcryptjs": "^3.0.3",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^4.22.1",
@@ -29,7 +29,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/bcryptjs": "^3.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "e-wallet-sentiment-database": "workspace:*",
     "eslint": "^10.0.2",
