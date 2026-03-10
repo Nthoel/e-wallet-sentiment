@@ -1,6 +1,12 @@
 const authService = require('./auth.service');
+const { forgetPasswordSchema } = require('./auth.validation');
 
+const BAD_REQUEST_STATUS = 400;
 const NO_CONTENT_STATUS = 204;
+
+const formatValidationError = error => {
+  return error.issues.map(issue => issue.message).join(', ');
+};
 
 /**
  * Controller untuk handle forget password request
@@ -10,7 +16,16 @@ const NO_CONTENT_STATUS = 204;
  */
 const forgetPassword = async (req, res, next) => {
   try {
-    const { email } = req.body;
+    const validationResult = forgetPasswordSchema.safeParse(req.body);
+
+    if (!validationResult.success) {
+      return res.status(BAD_REQUEST_STATUS).json({
+        status: 'error',
+        message: formatValidationError(validationResult.error)
+      });
+    }
+
+    const { email } = validationResult.data;
 
     // Panggil service untuk proses forget password
     await authService.forgetPassword(email);

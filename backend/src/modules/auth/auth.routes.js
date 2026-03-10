@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('./auth.controller');
-const { validate } = require('../../middlewares/validation.middleware');
-const { forgetPasswordSchema } = require('./auth.validation');
 
 /**
  * POST /auth/forget-password
@@ -10,10 +8,6 @@ const { forgetPasswordSchema } = require('./auth.validation');
  * Request body: { email: string }
  * Response: 204 No Content
  */
-router.post(
-  '/forget-password',
-  validate(forgetPasswordSchema),
-  authController.forgetPassword
-);
+router.post('/forget-password', authController.forgetPassword);
 
 module.exports = router;

@@ -32,20 +32,6 @@ describe('POST /api/auth/forget-password', () => {
   });
 
   describe('Success Cases', () => {
-    test('should return 204 on /auth/forget-password alias endpoint', async () => {
-      prisma.user.findUnique.mockResolvedValue(null);
-
-      const res = await request(app)
-        .post('/auth/forget-password')
-        .send({ email: 'alias@example.com' })
-        .expect(204);
-
-      expect(res.body).toEqual({});
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
-        where: { email: 'alias@example.com' }
-      });
-    });
-
     test('should return 204 when email is registered and send email', async () => {
       // Mock user exists
       const mockUser = {
@@ -112,6 +98,16 @@ describe('POST /api/auth/forget-password', () => {
 
       // Verify NO email was sent
       expect(sendMail).not.toHaveBeenCalled();
+    });
+
+    test('should return 404 when using removed /auth/forget-password alias endpoint', async () => {
+      const res = await request(app)
+        .post('/auth/forget-password')
+        .send({ email: 'alias@example.com' })
+        .expect(404);
+
+      expect(res.body).toEqual({});
+      expect(prisma.user.findUnique).not.toHaveBeenCalled();
     });
   });
 

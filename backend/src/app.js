@@ -23,7 +23,6 @@ const createApp = () => {
 
   // Auth routes
   app.use('/api/auth', authRouter);
-  app.use('/auth', authRouter);
 
   // Review routes
   app.use('/api/reviews', reviewRouter);
