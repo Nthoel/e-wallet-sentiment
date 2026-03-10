@@ -3,7 +3,6 @@ const STATUS_CODES = require('../../utils/status-code');
 const authValidation = require('./auth.validation');
 const ApiError = require('../../utils/api-error');
 
-
 const login = async (req, res, next) => {
   try {
     // Validasi request body
@@ -38,7 +37,6 @@ const register = async (req, res, next) => {
   }
 };
 
-
 /**
  * Controller untuk handle forget password request
  * @param {Object} req - Express request object
@@ -47,12 +45,16 @@ const register = async (req, res, next) => {
  */
 const forgetPassword = async (req, res, next) => {
   try {
-    const validationResult = authValidation.forgetPasswordSchema.safeParse(req.body);
+    const validationResult = authValidation.forgetPasswordSchema.safeParse(
+      req.body
+    );
 
     if (!validationResult.success) {
       return res.status(STATUS_CODES.BAD_REQUEST).json({
         status: 'error',
-        message: validationResult.error.issues.map(issue => issue.message).join(', ');
+        message: validationResult.error.issues
+          .map(issue => issue.message)
+          .join(', ')
       });
     }
 
@@ -68,7 +70,6 @@ const forgetPassword = async (req, res, next) => {
     next(error);
   }
 };
-
 
 module.exports = {
   forgetPassword,

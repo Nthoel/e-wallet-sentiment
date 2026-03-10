@@ -5,7 +5,6 @@ const createApp = require('../../src/app');
 const { prisma } = require('e-wallet-sentiment-database');
 const { sendMail } = require('../../src/mail');
 
-
 // Mock dependencies
 jest.mock('e-wallet-sentiment-database', () => ({
   prisma: {

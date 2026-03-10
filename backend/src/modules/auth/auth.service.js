@@ -8,12 +8,9 @@ const {
   generateRefreshToken
 } = require('../../utils/token');
 
-
 const RESET_TOKEN_BYTES = 32;
 const ONE_HOUR_IN_MILLISECONDS = 3600000;
-const VERIFICATION_TABLE_NAME = 'user_tokens';
 const SALT_ROUNDS = 10;
-
 
 const login = async credentials => {
   const { username, email, password } = credentials;
@@ -138,9 +135,11 @@ const forgetPassword = async email => {
   const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
 
   // Kirim email berisi link reset password
-  await mailService.sendTemplateMail("resetPassword", email, {name: user.username, resetLink: resetLink})
+  await mailService.sendTemplateMail('resetPassword', email, {
+    name: user.username,
+    resetLink: resetLink
+  });
 };
-
 
 module.exports = {
   login,
