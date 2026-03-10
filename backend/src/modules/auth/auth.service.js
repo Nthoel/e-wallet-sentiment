@@ -1,10 +1,102 @@
-const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 const { prisma } = require('e-wallet-sentiment-database');
-const { sendMail } = require('../../mail');
+const crypto = require('crypto');
+const ApiError = require('../../utils/api-error');
+const mailService = require('../../mail');
+const {
+  generateAccessToken,
+  generateRefreshToken
+} = require('../../utils/token');
+
 
 const RESET_TOKEN_BYTES = 32;
 const ONE_HOUR_IN_MILLISECONDS = 3600000;
 const VERIFICATION_TABLE_NAME = 'user_tokens';
+const SALT_ROUNDS = 10;
+
+
+const login = async credentials => {
+  const { username, email, password } = credentials;
+
+  const orConditions = [];
+  if (username) {
+    orConditions.push({ username });
+  }
+  if (email) {
+    orConditions.push({ email });
+  }
+
+  // Prepare query conditions
+  const where = {};
+  if (orConditions.length > 0) {
+    where.OR = orConditions;
+  }
+
+  // Find user by username or email
+  const user = await prisma.user.findFirst({ where });
+
+  if (!user) {
+    throw ApiError.unauthorized('Email/Username atau password salah');
+  }
+
+  // Verify password
+  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+  if (!isPasswordValid) {
+    throw ApiError.unauthorized('Email/Username atau password salah');
+  }
+
+  // Generate tokens using utility
+  const accessToken = generateAccessToken(user);
+  const { token: refreshToken, expiresAt } = generateRefreshToken(user);
+
+  // Hash refresh token for DB storage
+  const tokenHash = crypto
+    .createHash('sha256')
+    .update(refreshToken)
+    .digest('hex');
+
+  // Store refresh token
+  await prisma.refreshToken.create({
+    data: {
+      userId: user.id,
+      tokenHash,
+      isRevoked: false,
+      expiresAt
+    }
+  });
+
+  return {
+    access_token: accessToken,
+    refresh_token: refreshToken
+  };
+};
+
+const register = async ({ username, email, password }) => {
+  const existingEmail = await prisma.user.findUnique({ where: { email } });
+  if (existingEmail) {
+    throw ApiError.conflict('Email already registered');
+  }
+
+  const existingUsername = await prisma.user.findUnique({
+    where: { username }
+  });
+  if (existingUsername) {
+    throw ApiError.conflict('Username already taken');
+  }
+
+  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+
+  await prisma.user.create({
+    data: {
+      id: crypto.randomUUID(),
+      email,
+      username,
+      passwordHash
+    }
+  });
+
+  return { success: true };
+};
 
 /**
  * Service untuk handle forget password
@@ -46,32 +138,12 @@ const forgetPassword = async email => {
   const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
 
   // Kirim email berisi link reset password
-  await sendMail({
-    to: email,
-    subject: 'Reset Password - E-Wallet Sentiment',
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #333;">Reset Password</h2>
-        <p>Halo <strong>${user.username}</strong>,</p>
-        <p>Kami menerima permintaan untuk reset password akun Anda.</p>
-        <p>Klik tombol di bawah ini untuk reset password:</p>
-        <a href="${resetLink}" 
-           style="display: inline-block; padding: 12px 24px; background-color: #007bff; 
-                  color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">
-          Reset Password
-        </a>
-        <p>Atau copy link berikut ke browser Anda:</p>
-        <p style="word-break: break-all; color: #666;">${resetLink}</p>
-        <p style="color: #999; font-size: 14px; margin-top: 30px;">
-          Link ini akan kedaluwarsa dalam 1 jam.<br>
-          Jika Anda tidak meminta reset password, abaikan email ini.
-        </p>
-      </div>
-    `
-  });
+  await mailService.sendTemplateMail("resetPassword", email, {name: user.username, resetLink: resetLink})
 };
 
+
 module.exports = {
-  forgetPassword,
-  VERIFICATION_TABLE_NAME
+  login,
+  register,
+  forgetPassword
 };

@@ -1,5 +1,5 @@
 // Test setup file
-require('dotenv').config({ path: '.env.test' });
+require('dotenv').config({ path: '.env.test', override: true });
 
 // Set test environment
 process.env.NODE_ENV = 'test';

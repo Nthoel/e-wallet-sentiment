@@ -1,4 +1,5 @@
 const logger = require('../config/logger.config');
+const STATUS_CODES = require('../utils/status-code');
 
 /**
  * Global Handle error
@@ -9,13 +10,20 @@ const logger = require('../config/logger.config');
  * @param {import('express').NextFunction} _next
  */
 const errorHandleMiddleware = (err, req, res, _next) => {
-  logger.error(err.stack);
+  const statusCode =
+    err.statusCode || err.status || STATUS_CODES.INTERNAL_SERVER_ERROR;
 
-  // error
-  const DEFAULT_CODE_ERROR = 500;
-  res.status(err.status || DEFAULT_CODE_ERROR).json({
+  logger.warn(
+    `${req.method} ${req.originalUrl} - status: ${statusCode} - message: ${err.message}`
+  );
+  if (statusCode >= STATUS_CODES.INTERNAL_SERVER_ERROR) {
+    logger.error(err.stack);
+  }
+
+  res.status(statusCode).json({
     success: false,
     message: err.message || 'Internal Server Error',
+    ...(err.errors && { errors: err.errors }),
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
   });
 };

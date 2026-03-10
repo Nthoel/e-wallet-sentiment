@@ -6,7 +6,8 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV PRISMA_SKIP_POSTINSTALL_GENERATE=true
 
-RUN corepack enable
+# Install pnpm directly instead of using corepack to avoid signature verification issues
+RUN npm install -g pnpm
 
 WORKDIR /app
 

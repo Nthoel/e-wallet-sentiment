@@ -1,12 +1,43 @@
 const authService = require('./auth.service');
-const { forgetPasswordSchema } = require('./auth.validation');
+const STATUS_CODES = require('../../utils/status-code');
+const authValidation = require('./auth.validation');
+const ApiError = require('../../utils/api-error');
 
-const BAD_REQUEST_STATUS = 400;
-const NO_CONTENT_STATUS = 204;
 
-const formatValidationError = error => {
-  return error.issues.map(issue => issue.message).join(', ');
+const login = async (req, res, next) => {
+  try {
+    // Validasi request body
+    const result = authValidation.loginSchema.safeParse(req.body);
+    if (!result.success) {
+      return next(ApiError.validation('Validation failed', result.error));
+    }
+
+    const tokens = await authService.login(req.body);
+    res.status(STATUS_CODES.OK).json({
+      ...tokens
+    });
+  } catch (error) {
+    next(error);
+  }
 };
+
+const register = async (req, res, next) => {
+  try {
+    // Validasi request body
+    const result = authValidation.registerSchema.safeParse(req.body);
+    if (!result.success) {
+      return next(
+        ApiError.validation('Username atau email wajib diisi', result.error)
+      );
+    }
+
+    const data = await authService.register(result.data);
+    return res.status(STATUS_CODES.CREATED).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 /**
  * Controller untuk handle forget password request
@@ -16,12 +47,12 @@ const formatValidationError = error => {
  */
 const forgetPassword = async (req, res, next) => {
   try {
-    const validationResult = forgetPasswordSchema.safeParse(req.body);
+    const validationResult = authValidation.forgetPasswordSchema.safeParse(req.body);
 
     if (!validationResult.success) {
-      return res.status(BAD_REQUEST_STATUS).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         status: 'error',
-        message: formatValidationError(validationResult.error)
+        message: validationResult.error.issues.map(issue => issue.message).join(', ');
       });
     }
 
@@ -32,12 +63,15 @@ const forgetPassword = async (req, res, next) => {
 
     // Selalu return 204 No Content
     // (baik email terdaftar maupun tidak, untuk keamanan)
-    return res.status(NO_CONTENT_STATUS).send();
+    return res.status(STATUS_CODES.NO_CONTENT).send();
   } catch (error) {
     next(error);
   }
 };
 
+
 module.exports = {
-  forgetPassword
+  forgetPassword,
+  login,
+  register
 };

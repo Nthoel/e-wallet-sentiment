@@ -44,6 +44,8 @@ model User {
   role         UserRole  @default(VIEWER)
   avatarUrl    String?
   lastLoginAt  DateTime? @db.Timestamptz(6)
+  isVerified   Boolean   @default(false)
+  verifiedAt   DateTime? @db.Timestamptz(6)
   createdAt    DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt    DateTime  @updatedAt @db.Timestamptz(6)
 
