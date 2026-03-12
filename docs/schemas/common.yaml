@@ -1,0 +1,40 @@
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Internal Server Error"
+        errors:
+          type: object
+          description: Detail error validasi (opsional)
+        stack:
+          type: string
+          description: Stack trace (hanya muncul di mode development)
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Validation failed"
+        errors:
+          type: object
+          description: Detail error per field
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "ok"
+        service:
+          type: string
+          example: "e-wallet-sentiment-backend"

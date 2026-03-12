@@ -2,9 +2,11 @@ packages:
   - frontend
   - backend
   - database
+  - docs
 
 onlyBuiltDependencies:
   - '@prisma/client'
   - '@prisma/engines'
+  - '@scarf/scarf'
   - esbuild
   - prisma

@@ -1,0 +1,214 @@
+components:
+  schemas:
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID unik review
+          example: "gp_abc123"
+        user_name:
+          type: string
+          nullable: true
+          example: "John Doe"
+        user_image:
+          type: string
+          nullable: true
+          example: "https://lh3.googleusercontent.com/..."
+        content:
+          type: string
+          description: Isi review
+          example: "Aplikasi sangat membantu untuk transaksi sehari-hari"
+        score:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+          description: Rating 1-5
+          example: 4
+        thumbs_up_count:
+          type: integer
+          nullable: true
+          example: 12
+        review_created_version:
+          type: string
+          nullable: true
+          example: "3.2.1"
+        review_datetime:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-03-10T08:30:00.000Z"
+        reply_content:
+          type: string
+          nullable: true
+          example: "Terima kasih atas ulasannya!"
+        replied_at:
+          type: string
+          format: date-time
+          nullable: true
+        app_version:
+          type: string
+          nullable: true
+          example: "3.2.1"
+        timestamp_unix:
+          type: number
+          nullable: true
+          example: 1773350400
+        timestamp_formatted:
+          type: string
+          nullable: true
+          example: "2026-03-10 08:00:00"
+        source:
+          type: string
+          description: Sumber review (e.g. google_play, app_store)
+          example: "google_play"
+        is_analyzed:
+          type: boolean
+          nullable: true
+          description: Apakah sudah dianalisis sentimen
+          example: false
+        sentiment_result:
+          type: string
+          nullable: true
+          description: Hasil analisis sentimen
+          example: "positive"
+        confidence_score:
+          type: number
+          format: float
+          nullable: true
+          description: Skor confidence analisis sentimen (0-1)
+          example: 0.92
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-03-10T08:30:00.000Z"
+
+    GetReviewsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        total_results:
+          type: integer
+          example: 150
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Review"
+
+    CreateReviewRequest:
+      type: object
+      required:
+        - id
+        - content
+        - source
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: ID unik review
+          example: "gp_abc123"
+        user_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: "John Doe"
+        user_image:
+          type: string
+          nullable: true
+        content:
+          type: string
+          description: Isi review
+          example: "Transaksi cepat dan mudah"
+        score:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+          example: 5
+        thumbs_up_count:
+          type: integer
+          minimum: 0
+          nullable: true
+          example: 3
+        review_created_version:
+          type: string
+          maxLength: 100
+          nullable: true
+        review_datetime:
+          type: string
+          format: date-time
+          nullable: true
+        reply_content:
+          type: string
+          nullable: true
+        replied_at:
+          type: string
+          format: date-time
+          nullable: true
+        app_version:
+          type: string
+          maxLength: 100
+          nullable: true
+        timestamp_unix:
+          type: number
+          nullable: true
+        timestamp_formatted:
+          type: string
+          maxLength: 50
+          nullable: true
+        source:
+          type: string
+          maxLength: 50
+          description: Sumber review
+          example: "google_play"
+
+    CreateReviewResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Review created successfully"
+        data:
+          $ref: "#/components/schemas/Review"
+
+    GetReviewsQueryParams:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Nomor halaman
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+          description: Jumlah data per halaman
+        source:
+          type: string
+          description: Filter berdasarkan sumber review
+          example: "google_play"
+        sentiment_result:
+          type: string
+          description: Filter berdasarkan hasil sentimen
+          example: "positive"
+        is_analyzed:
+          type: string
+          enum:
+            - "true"
+            - "false"
+          description: Filter berdasarkan status analisis
+        sort_order:
+          type: string
+          enum:
+            - asc
+            - desc
+          default: desc
+          description: Urutan sorting berdasarkan created_at

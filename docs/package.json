@@ -1,0 +1,17 @@
+{
+  "name": "e-wallet-sentiment-docs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone API documentation server untuk E-Wallet Sentiment",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "generate": "node generate-docs.js"
+  },
+  "dependencies": {
+    "express": "^4.22.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  }
+}

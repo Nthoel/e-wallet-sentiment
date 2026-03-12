@@ -1,0 +1,74 @@
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - password
+      properties:
+        username:
+          type: string
+          description: Username (wajib salah satu username atau email)
+          example: "johndoe"
+        email:
+          type: string
+          format: email
+          description: Email (wajib salah satu username atau email)
+          example: "john@example.com"
+        password:
+          type: string
+          minLength: 1
+          description: Password user
+          example: "password123"
+
+    LoginResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: JWT access token
+          example: "eyJhbGciOiJIUzI1NiIs..."
+        refresh_token:
+          type: string
+          description: JWT refresh token
+          example: "eyJhbGciOiJIUzI1NiIs..."
+
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          description: Username minimal 3 karakter
+          example: "johndoe"
+        email:
+          type: string
+          format: email
+          description: Email yang valid
+          example: "john@example.com"
+        password:
+          type: string
+          minLength: 6
+          description: Password minimal 6 karakter
+          example: "password123"
+
+    RegisterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    ForgetPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email terdaftar untuk reset password
+          example: "john@example.com"
