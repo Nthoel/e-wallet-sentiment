@@ -21,7 +21,10 @@ function authMiddleware(req, res, next) {
       });
     }
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET || process.env.JWT_ACCESS_SECRET);
+    const payload = jwt.verify(
+      token,
+      process.env.JWT_SECRET || process.env.JWT_ACCESS_SECRET
+    );
 
     // Simpan user context untuk dipakai controller/service
     req.user = {

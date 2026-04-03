@@ -11,7 +11,8 @@ jest.mock('e-wallet-sentiment-database', () => ({
     user: {
       findUnique: jest.fn(),
       findFirst: jest.fn(),
-      create: jest.fn()
+      create: jest.fn(),
+      update: jest.fn()
     },
     userToken: {
       create: jest.fn()
