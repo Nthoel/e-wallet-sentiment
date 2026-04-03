@@ -46,6 +46,14 @@ const login = async credentials => {
   const accessToken = generateAccessToken(user);
   const { token: refreshToken, expiresAt } = generateRefreshToken(user);
 
+  // Update last login timestamp
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      lastLoginAt: new Date()
+    }
+  });
+
   // Hash refresh token for DB storage
   const tokenHash = crypto
     .createHash('sha256')
