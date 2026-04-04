@@ -72,3 +72,43 @@ components:
           format: email
           description: Email terdaftar untuk reset password
           example: "john@example.com"
+
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Registrasi pengguna baru
+      description: Membuat akun baru dengan username, email, dan password.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: Registrasi berhasil
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisterResponse"
+        "400":
+          description: Bad Request (Input tidak valid)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Conflict (Username atau email sudah digunakan)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
