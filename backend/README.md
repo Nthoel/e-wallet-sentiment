@@ -68,6 +68,18 @@ NODE_ENV=development
 
 # Database
 DATABASE_URL=postgresql://user:password@localhost:5433/e_wallet_sentiment
+
+# Image Upload
+IMAGE_PROVIDER=local
+IMAGE_MAX_FILE_SIZE_MB=5
+IMAGE_LOCAL_UPLOAD_DIR=uploads
+IMAGE_LOCAL_SERVE_PATH=/uploads
+
+# Cloudinary (required when IMAGE_PROVIDER=cloudinary)
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_FOLDER=e-wallet-sentiment
 ```
 
 3. **Setup database**
@@ -149,6 +161,11 @@ pnpm jest --watch
 ### Health Check
 
 - **GET** `/api/health` - Check API health status
+
+### Profile
+
+- **GET** `/api/profile/me` - Get logged-in user profile
+- **PATCH** `/api/profile/me/avatar` - Upload/update logged-in user avatar (`multipart/form-data`, field: `image`)
 
 ## Project Structure
 

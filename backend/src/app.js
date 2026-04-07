@@ -3,6 +3,7 @@ const swaggerUi = require('swagger-ui-express');
 const loggerMiddleware = require('./middlewares/logging.middleware');
 const errorHandleMiddleware = require('./middlewares/error-logger.middleware');
 const swaggerSpec = require('./config/swagger.config');
+const getImageConfig = require('./config/image.config');
 const reviewRouter = require('./modules/reviews/review.router');
 const authRouter = require('./modules/auth/auth.routes');
 const profileRouter = require('./modules/profile/profile.routes');
@@ -15,6 +16,15 @@ const createApp = () => {
 
   // Logging
   app.use(loggerMiddleware);
+
+  const imageConfig = getImageConfig();
+
+  if (imageConfig.provider === 'local') {
+    app.use(
+      imageConfig.localServePath,
+      express.static(imageConfig.localUploadAbsoluteDir)
+    );
+  }
 
   // ENDPOINT
   // -------------

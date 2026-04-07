@@ -46,3 +46,7 @@ docker-compose.override.yml
 coverage/
 htmlcov/
 .coverage
+
+# Local image uploads
+backend/uploads/
+backend/uploads-test/
