@@ -46,11 +46,6 @@ const profileResponseSchema = {
   }
 };
 
-const validateGetProfile = (req, _res, next) => {
-  next();
-};
-
 module.exports = {
-  profileResponseSchema,
-  validateGetProfile
+  profileResponseSchema
 };

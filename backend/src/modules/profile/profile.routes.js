@@ -1,7 +1,6 @@
 const express = require('express');
 const authMiddleware = require('../../middlewares/auth.middleware');
 const profileController = require('./profile.controller');
-const { validateGetProfile } = require('./profile.validation');
 
 const router = express.Router();
 
@@ -41,11 +40,6 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get(
-  '/me',
-  authMiddleware,
-  validateGetProfile,
-  profileController.getProfile
-);
+router.get('/me', authMiddleware, profileController.getProfile);
 
 module.exports = router;
