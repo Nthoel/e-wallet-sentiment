@@ -18,7 +18,9 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY backend ./backend
 COPY database ./database
 
-# 3. Install dependensi
+# Install dependencies dengan pnpm 9.15.4
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 RUN pnpm install --frozen-lockfile
 
 # 4. Generate Prisma Client (dummy DATABASE_URL karena generate tidak connect ke DB)

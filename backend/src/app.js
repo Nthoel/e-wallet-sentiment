@@ -1,8 +1,10 @@
 const express = require('express');
+const swaggerUi = require('swagger-ui-express');
 const loggerMiddleware = require('./middlewares/logging.middleware');
 const errorHandleMiddleware = require('./middlewares/error-logger.middleware');
+const swaggerSpec = require('./config/swagger.config');
 const reviewRouter = require('./modules/reviews/review.router');
-const authRouter = require('./modules/auth/auth.router');
+const authRouter = require('./modules/auth/auth.routes');
 const app = express();
 
 const createApp = () => {
@@ -16,16 +18,37 @@ const createApp = () => {
   // ENDPOINT
   // -------------
 
-  // Health check endpoint
+  // Swagger API Docs
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.get('/api/docs.json', (req, res) => {
+    res.json(swaggerSpec);
+  });
+
+  /**
+   * @openapi
+   * /api/health:
+   *   get:
+   *     tags:
+   *       - Health
+   *     summary: Health check
+   *     description: Mengecek apakah backend server berjalan dengan baik.
+   *     responses:
+   *       200:
+   *         description: Server berjalan normal
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/HealthResponse'
+   */
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', service: 'e-wallet-sentiment-backend' });
   });
 
-  // Review routes
-  app.use('/api/reviews', reviewRouter);
-
   // Auth routes
   app.use('/api/auth', authRouter);
+
+  // Review routes
+  app.use('/api/reviews', reviewRouter);
 
   // Handle Error API
   app.use(errorHandleMiddleware);
