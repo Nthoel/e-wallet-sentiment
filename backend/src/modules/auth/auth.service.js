@@ -175,7 +175,7 @@ const verifyForgetPasswordToken = async token => {
     user_id: userToken.userId,
     type: userToken.type,
     expires_at: userToken.expiresAt
-   };
+  };
 };
 
 /**

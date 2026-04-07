@@ -71,7 +71,6 @@ const forgetPassword = async (req, res, next) => {
   }
 };
 
-
 const verifyForgetPasswordToken = async (req, res, next) => {
   try {
     const result = authValidation.verifiTokenSchema.safeParse(req.body);
