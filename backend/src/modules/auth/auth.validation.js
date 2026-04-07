@@ -62,8 +62,17 @@ const registerSchema = z.object({
     .min(MIN_PASSWORD_LENGTH, 'Password must be at least 6 characters')
 });
 
+const verifiTokenSchema = z.object({
+  token: z
+    .string({
+      required_error: 'Token is required'
+    })
+    .min(1, 'Token cannot be empty')
+});
+
 module.exports = {
   loginSchema,
   registerSchema,
-  forgetPasswordSchema
+  forgetPasswordSchema,
+  verifiTokenSchema
 };

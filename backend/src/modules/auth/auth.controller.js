@@ -71,8 +71,28 @@ const forgetPassword = async (req, res, next) => {
   }
 };
 
+const verifyForgetPasswordToken = async (req, res, next) => {
+  try {
+    const result = authValidation.verifiTokenSchema.safeParse(req.body);
+    if (!result.success) {
+      return next(ApiError.validation('Validation failed', result.error));
+    }
+
+    const data = await authService.verifyForgetPasswordToken(result.data.token);
+
+    return res.status(STATUS_CODES.OK).json({
+      success: true,
+      message: ' Forget password token is valid',
+      data: data
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   forgetPassword,
   login,
-  register
+  register,
+  verifyForgetPasswordToken
 };

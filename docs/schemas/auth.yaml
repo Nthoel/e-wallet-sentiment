@@ -72,3 +72,64 @@ components:
           format: email
           description: Email terdaftar untuk reset password
           example: "john@example.com"
+
+paths:
+  /api/auth/forget-password/verify-token:
+    post:
+      tags:
+        - Auth
+      summary: Verifikasi token forget password
+      description: Mengecek apakah token reset password valid, belum digunakan, dan belum kadaluarsa.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                  description: Token raw yang didapat user dari email
+                  example: "abc123randomstring"
+      responses:
+        "200":
+          description: Token valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Forget password token is valid"
+                  data:
+                    type: object
+                    properties:
+                      user_id:
+                        type: string
+                        example: "00000000-0000-0000-0000-000000000001"
+                      type:
+                        type: string
+                        example: "PASSWORD_RESET"
+                      expires_at:
+                        type: string
+                        format: date-time
+                        example: "2026-04-02T10:00:00.000Z"
+        "400":
+          description: Bad Request (Input token tidak valid/kosong)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized (Token tidak valid, sudah kadaluarsa, atau sudah digunakan)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
