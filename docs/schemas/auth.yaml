@@ -72,3 +72,67 @@ components:
           format: email
           description: Email terdaftar untuk reset password
           example: "john@example.com"
+
+    ProfileData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID user
+          example: "9dd8d0a5-f902-4cd9-8838-4f42f0f3e658"
+        email:
+          type: string
+          format: email
+          description: Email user
+          example: "john@example.com"
+        username:
+          type: string
+          description: Username user
+          example: "johndoe"
+        role:
+          type: string
+          enum:
+            - ADMIN
+            - EDITOR
+            - VIEWER
+          description: Role user
+          example: "VIEWER"
+        avatarUrl:
+          type: string
+          nullable: true
+          description: URL avatar user
+          example: "https://example.com/avatar.jpg"
+        isVerified:
+          type: boolean
+          description: Status verifikasi email
+          example: true
+        verifiedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Waktu verifikasi email
+          example: "2026-04-01T09:30:00.000Z"
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Waktu login terakhir
+          example: "2026-04-07T10:15:00.000Z"
+        createdAt:
+          type: string
+          format: date-time
+          description: Waktu akun dibuat
+          example: "2026-03-01T08:00:00.000Z"
+
+    GetProfileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Profile fetched"
+        data:
+          $ref: "#/components/schemas/ProfileData"

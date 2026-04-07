@@ -20,6 +20,15 @@ const options = {
         description: 'Backend Server'
       }
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      }
+    },
     tags: [
       {
         name: 'Health',
@@ -32,6 +41,10 @@ const options = {
       {
         name: 'Reviews',
         description: 'Manajemen review e-wallet'
+      },
+      {
+        name: 'Profile',
+        description: 'Manajemen profil user'
       }
     ]
   },

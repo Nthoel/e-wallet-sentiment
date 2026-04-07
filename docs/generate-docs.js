@@ -20,10 +20,20 @@ const options = {
         "Platform ini menyediakan fitur analisis sentimen review e-wallet dari Google Play Store.",
     },
     servers: [{ url: API_BASE_URL, description: "Backend Server" }],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
     tags: [
       { name: "Health", description: "Health check endpoint" },
       { name: "Auth", description: "Autentikasi dan manajemen user" },
       { name: "Reviews", description: "Manajemen review e-wallet" },
+      { name: "Profile", description: "Manajemen profil user" },
     ],
   },
   apis: [
