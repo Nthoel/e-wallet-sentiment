@@ -1,78 +1,473 @@
-const authService = require('./auth.service');
-const STATUS_CODES = require('../../utils/status-code');
-const authValidation = require('./auth.validation');
-const ApiError = require('../../utils/api-error');
+require('dotenv').config({ path: '.env.test', override: true });
+const bcrypt = require('bcrypt');
+const request = require('supertest');
+const createApp = require('../../src/app');
+const { prisma } = require('e-wallet-sentiment-database');
+const { sendTemplateMail } = require('../../src/mail');
 
-const login = async (req, res, next) => {
-  try {
-    // Validasi request body
-    const result = authValidation.loginSchema.safeParse(req.body);
-    if (!result.success) {
-      return next(ApiError.validation('Validation failed', result.error));
+// Mock dependencies
+jest.mock('e-wallet-sentiment-database', () => ({
+  prisma: {
+    user: {
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn()
+    },
+    userToken: {
+      create: jest.fn()
+    },
+    refreshToken: {
+      create: jest.fn()
     }
-
-    const tokens = await authService.login(req.body);
-    res.status(STATUS_CODES.OK).json({
-      ...tokens
-    });
-  } catch (error) {
-    next(error);
   }
-};
+}));
 
-const register = async (req, res, next) => {
-  try {
-    // Validasi request body
-    const result = authValidation.registerSchema.safeParse(req.body);
-    if (!result.success) {
-      return next(
-        ApiError.validation('Username atau email wajib diisi', result.error)
-      );
-    }
+jest.mock('../../src/mail', () => ({
+  sendMail: jest.fn(),
+  sendTemplateMail: jest.fn()
+}));
 
-    const data = await authService.register(result.data);
-    return res.status(STATUS_CODES.CREATED).json(data);
-  } catch (error) {
-    next(error);
-  }
-};
+let app;
 
-/**
- * Controller untuk handle forget password request
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware
- */
-const forgetPassword = async (req, res, next) => {
-  try {
-    const validationResult = authValidation.forgetPasswordSchema.safeParse(
-      req.body
-    );
+beforeAll(() => {
+  app = createApp();
+});
 
-    if (!validationResult.success) {
-      return res.status(STATUS_CODES.BAD_REQUEST).json({
-        status: 'error',
-        message: validationResult.error.issues
-          .map(issue => issue.message)
-          .join(', ')
+beforeEach(() => {
+  // Clear all mocks before each test
+  jest.clearAllMocks();
+});
+
+describe('POST /api/auth/forget-password', () => {
+  describe('Success Cases', () => {
+    test('should return 204 when email is registered and send email', async () => {
+      // Mock user exists
+      const mockUser = {
+        id: 'user-123',
+        email: 'user@example.com',
+        username: 'testuser'
+      };
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.userToken.create.mockResolvedValue({});
+      sendTemplateMail.mockResolvedValue({ success: true });
+
+      const res = await request(app)
+        .post('/api/auth/forget-password')
+        .send({ email: 'user@example.com' })
+        .expect(204);
+
+      // Check response
+      expect(res.body).toEqual({});
+
+      // Verify user was checked
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { email: 'user@example.com' }
       });
-    }
 
-    const { email } = validationResult.data;
+      // Verify token was created
+      expect(prisma.userToken.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            userId: 'user-123',
+            type: 'PASSWORD_RESET',
+            isUsed: false
+          })
+        })
+      );
 
-    // Panggil service untuk proses forget password
-    await authService.forgetPassword(email);
+      // Verify email was sent
+      expect(sendTemplateMail).toHaveBeenCalledWith(
+        'resetPassword',
+        'user@example.com',
+        expect.objectContaining({
+          name: 'testuser',
+          resetLink: expect.any(String)
+        })
+      );
+    });
 
-    // Selalu return 204 No Content
-    // (baik email terdaftar maupun tidak, untuk keamanan)
-    return res.status(STATUS_CODES.NO_CONTENT).send();
-  } catch (error) {
-    next(error);
-  }
-};
+    test('should return 204 when email is not registered (security)', async () => {
+      // Mock user does not exist
+      prisma.user.findUnique.mockResolvedValue(null);
 
-module.exports = {
-  forgetPassword,
-  login,
-  register
-};
+      const res = await request(app)
+        .post('/api/auth/forget-password')
+        .send({ email: 'notregistered@example.com' })
+        .expect(204);
+
+      // Check response
+      expect(res.body).toEqual({});
+
+      // Verify user was checked
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { email: 'notregistered@example.com' }
+      });
+
+      // Verify NO token was created
+      expect(prisma.userToken.create).not.toHaveBeenCalled();
+
+      // Verify NO email was sent
+      expect(sendTemplateMail).not.toHaveBeenCalled();
+    });
+
+    test('should return 404 when using removed /auth/forget-password alias endpoint', async () => {
+      const res = await request(app)
+        .post('/auth/forget-password')
+        .send({ email: 'alias@example.com' })
+        .expect(404);
+
+      expect(res.body).toEqual({});
+      expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Validation Errors', () => {
+    test('should return 400 when email format is invalid', async () => {
+      const res = await request(app)
+        .post('/api/auth/forget-password')
+        .send({ email: 'invalidemail' })
+        .expect(400);
+
+      expect(res.body).toEqual({
+        status: 'error',
+        message: expect.stringContaining('valid email')
+      });
+
+      // Verify no database call was made
+      expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    });
+
+    test('should return 400 when email is empty', async () => {
+      const res = await request(app)
+        .post('/api/auth/forget-password')
+        .send({ email: '' })
+        .expect(400);
+
+      expect(res.body).toEqual({
+        status: 'error',
+        message: expect.stringContaining('required')
+      });
+    });
+
+    test('should return 400 when email field is missing', async () => {
+      const res = await request(app)
+        .post('/api/auth/forget-password')
+        .send({})
+        .expect(400);
+
+      expect(res.body).toEqual({
+        status: 'error',
+        message: expect.stringContaining('required')
+      });
+    });
+
+    test('should return 400 when request body contains invalid fields', async () => {
+      const res = await request(app)
+        .post('/api/auth/forget-password')
+        .send({
+          email: 'user@example.com',
+          extraField: 'shouldBeStripped'
+        })
+        .expect(204);
+
+      // Even with extra fields, stripUnknown should remove them
+      // and the request should succeed
+      expect(res.body).toEqual({});
+    });
+  });
+
+  describe('Edge Cases', () => {
+    test('should handle database errors gracefully', async () => {
+      prisma.user.findUnique.mockRejectedValue(new Error('Database error'));
+
+      const res = await request(app)
+        .post('/api/auth/forget-password')
+        .send({ email: 'user@example.com' })
+        .expect(500);
+
+      // Error should be caught by error middleware
+      expect(res.body).toEqual({
+        success: false,
+        message: 'Database error'
+      });
+    });
+
+    test('should handle email sending errors gracefully', async () => {
+      const mockUser = {
+        id: 'user-123',
+        email: 'user@example.com',
+        username: 'testuser'
+      };
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.userToken.create.mockResolvedValue({});
+      sendTemplateMail.mockRejectedValue(new Error('Email service down'));
+
+      const res = await request(app)
+        .post('/api/auth/forget-password')
+        .send({ email: 'user@example.com' })
+        .expect(500);
+
+      // Error should be caught by error middleware
+      expect(res.body).toEqual({
+        success: false,
+        message: 'Email service down'
+      });
+    });
+  });
+});
+
+describe('POST /api/auth/register', () => {
+  describe('Success Cases', () => {
+    test('should return 201 when registration is successful', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+      prisma.user.create.mockResolvedValue({});
+
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'newuser',
+          email: 'newuser@example.com',
+          password: 'password123'
+        })
+        .expect(201);
+
+      expect(res.body).toEqual({ success: true });
+      expect(prisma.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            username: 'newuser',
+            email: 'newuser@example.com'
+          })
+        })
+      );
+    });
+  });
+
+  describe('Validation Errors', () => {
+    test('should return 400 when username is missing', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'user@example.com',
+          password: 'password123'
+        })
+        .expect(400);
+
+      expect(res.body.success).toBe(false);
+      expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    });
+
+    test('should return 400 when email is missing', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'newuser',
+          password: 'password123'
+        })
+        .expect(400);
+
+      expect(res.body.success).toBe(false);
+    });
+
+    test('should return 400 when password is missing', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'newuser',
+          email: 'user@example.com'
+        })
+        .expect(400);
+
+      expect(res.body.success).toBe(false);
+    });
+
+    test('should return 400 when email format is invalid', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'newuser',
+          email: 'invalidemail',
+          password: 'password123'
+        })
+        .expect(400);
+
+      expect(res.body.success).toBe(false);
+    });
+
+    test('should return 400 when username is too short', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'ab',
+          email: 'user@example.com',
+          password: 'password123'
+        })
+        .expect(400);
+
+      expect(res.body.success).toBe(false);
+    });
+
+    test('should return 400 when password is too short', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'newuser',
+          email: 'user@example.com',
+          password: '12345'
+        })
+        .expect(400);
+
+      expect(res.body.success).toBe(false);
+    });
+  });
+
+  describe('Conflict Cases', () => {
+    test('should return 409 when email is already registered', async () => {
+      prisma.user.findUnique.mockResolvedValueOnce({ id: 'existing-user' });
+
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'newuser',
+          email: 'existing@example.com',
+          password: 'password123'
+        })
+        .expect(409);
+
+      expect(res.body.message).toMatch(/Email already registered/);
+      expect(prisma.user.create).not.toHaveBeenCalled();
+    });
+
+    test('should return 409 when username is already taken', async () => {
+      prisma.user.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ id: 'existing-user' });
+
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'existinguser',
+          email: 'new@example.com',
+          password: 'password123'
+        })
+        .expect(409);
+
+      expect(res.body.message).toMatch(/Username already taken/);
+      expect(prisma.user.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Edge Cases', () => {
+    test('should handle database errors gracefully', async () => {
+      prisma.user.findUnique.mockRejectedValue(new Error('Database error'));
+
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'newuser',
+          email: 'user@example.com',
+          password: 'password123'
+        })
+        .expect(500);
+
+      expect(res.body).toEqual({
+        success: false,
+        message: 'Database error'
+      });
+    });
+  });
+});
+
+describe('POST /api/auth/login', () => {
+  let testUser;
+
+  beforeAll(async () => {
+    const passwordHash = await bcrypt.hash('password', 10);
+    testUser = {
+      id: 'user-login-123',
+      username: 'testuser',
+      email: 'testuser@example.com',
+      passwordHash,
+      role: 'VIEWER'
+    };
+  });
+
+  test('should login successfully with username and correct password', async () => {
+    prisma.user.findFirst.mockResolvedValue(testUser);
+    prisma.refreshToken.create.mockResolvedValue({});
+
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({
+        username: testUser.username,
+        password: 'password'
+      })
+      .expect(200);
+
+    expect(res.body).toHaveProperty('access_token');
+    expect(res.body).toHaveProperty('refresh_token');
+
+    expect(prisma.refreshToken.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          userId: testUser.id,
+          isRevoked: false
+        })
+      })
+    );
+  });
+
+  test('should login successfully with email and correct password', async () => {
+    prisma.user.findFirst.mockResolvedValue(testUser);
+    prisma.refreshToken.create.mockResolvedValue({});
+
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({
+        email: testUser.email,
+        password: 'password'
+      })
+      .expect(200);
+
+    expect(res.body).toHaveProperty('access_token');
+    expect(res.body).toHaveProperty('refresh_token');
+  });
+
+  test('should fail with incorrect password', async () => {
+    prisma.user.findFirst.mockResolvedValue(testUser);
+
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({
+        username: testUser.username,
+        password: 'wrongpassword'
+      })
+      .expect(401);
+
+    expect(res.body.message).toMatch(/Email\/Username atau password salah/);
+  });
+
+  test('should fail with non-existent user', async () => {
+    prisma.user.findFirst.mockResolvedValue(null);
+
+    await request(app)
+      .post('/api/auth/login')
+      .send({
+        username: 'notfounduser123',
+        password: 'password'
+      })
+      .expect(401);
+  });
+
+  test('should fail validation when username/email is missing', async () => {
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({
+        password: 'password'
+      })
+      .expect(400);
+
+    expect(res.body.errors).toBeDefined();
+  });
+});
