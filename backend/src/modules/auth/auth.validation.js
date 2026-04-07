@@ -69,10 +69,14 @@ const verifiTokenSchema = z.object({
     })
     .min(1, 'Token cannot be empty')
 });
+const refreshTokenSchema = z.object({
+  refresh_token: z.string().min(1, 'Refresh token wajib diisi')
+});
 
 module.exports = {
   loginSchema,
   registerSchema,
   forgetPasswordSchema,
-  verifiTokenSchema
+  verifiTokenSchema,
+  refreshTokenSchema
 };

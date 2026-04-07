@@ -5,6 +5,7 @@ const errorHandleMiddleware = require('./middlewares/error-logger.middleware');
 const swaggerSpec = require('./config/swagger.config');
 const reviewRouter = require('./modules/reviews/review.router');
 const authRouter = require('./modules/auth/auth.routes');
+const profileRouter = require('./modules/profile/profile.routes');
 const app = express();
 
 const createApp = () => {
@@ -49,6 +50,9 @@ const createApp = () => {
 
   // Review routes
   app.use('/api/reviews', reviewRouter);
+
+  // Profile routes
+  app.use('/api/profile', profileRouter);
 
   // Handle Error API
   app.use(errorHandleMiddleware);

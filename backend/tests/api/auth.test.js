@@ -11,13 +11,16 @@ jest.mock('e-wallet-sentiment-database', () => ({
     user: {
       findUnique: jest.fn(),
       findFirst: jest.fn(),
-      create: jest.fn()
+      create: jest.fn(),
+      update: jest.fn()
     },
     userToken: {
       create: jest.fn()
     },
     refreshToken: {
-      create: jest.fn()
+      create: jest.fn(),
+      findFirst: jest.fn(),
+      update: jest.fn()
     }
   }
 }));
@@ -468,5 +471,92 @@ describe('POST /api/auth/login', () => {
       .expect(400);
 
     expect(res.body.errors).toBeDefined();
+  });
+});
+
+describe('POST /api/auth/refresh-token', () => {
+  const mockUser = {
+    id: 'user-refresh-123',
+    username: 'refreshuser',
+    email: 'refresh@example.com',
+    role: 'VIEWER'
+  };
+
+  const validRefreshToken = 'some-valid-jwt-token';
+  const mockStoredToken = {
+    id: 'token-uuid-123',
+    userId: mockUser.id,
+    tokenHash: 'hashed-token',
+    isRevoked: false,
+    expiresAt: new Date(Date.now() + 1000000),
+    user: mockUser
+  };
+
+  test('should refresh tokens successfully', async () => {
+    prisma.refreshToken.findFirst.mockResolvedValue(mockStoredToken);
+    prisma.refreshToken.update.mockResolvedValue({
+      ...mockStoredToken,
+      isRevoked: true
+    });
+    prisma.refreshToken.create.mockResolvedValue({});
+
+    const res = await request(app)
+      .post('/api/auth/refresh-token')
+      .send({ refresh_token: validRefreshToken })
+      .expect(200);
+
+    expect(res.body.success).toBe(true);
+    expect(res.body.message).toBe('Token refreshed');
+    expect(res.body.data).toHaveProperty('access_token');
+    expect(res.body.data).toHaveProperty('refresh_token');
+
+    // Verify old token was revoked
+    expect(prisma.refreshToken.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: mockStoredToken.id },
+        data: expect.objectContaining({ isRevoked: true })
+      })
+    );
+
+    // Verify new token was created
+    expect(prisma.refreshToken.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          userId: mockUser.id,
+          isRevoked: false
+        })
+      })
+    );
+  });
+
+  test('should fail when refresh_token is missing', async () => {
+    const res = await request(app)
+      .post('/api/auth/refresh-token')
+      .send({})
+      .expect(400);
+
+    expect(res.body.success).toBe(false);
+  });
+
+  test('should fail when refresh_token is not found in DB or revoked', async () => {
+    prisma.refreshToken.findFirst.mockResolvedValue(null);
+
+    const res = await request(app)
+      .post('/api/auth/refresh-token')
+      .send({ refresh_token: 'invalid-token' })
+      .expect(401);
+
+    expect(res.body.message).toMatch(/tidak valid atau sudah expired/);
+  });
+
+  test('should fail when refresh_token is expired', async () => {
+    prisma.refreshToken.findFirst.mockResolvedValue(null); // Assuming findFirst filters by expiresAt
+
+    const res = await request(app)
+      .post('/api/auth/refresh-token')
+      .send({ refresh_token: 'expired-token' })
+      .expect(401);
+
+    expect(res.body.message).toMatch(/tidak valid atau sudah expired/);
   });
 });

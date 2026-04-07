@@ -104,4 +104,40 @@ router.post('/register', authController.register);
  */
 router.post('/forget-password', authController.forgetPassword);
 
+/**
+ * @openapi
+ * /api/auth/refresh-token:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Refresh access token
+ *     description: Menggunakan refresh token untuk mendapatkan access token baru. Mengimplementasikan token rotation.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RefreshTokenRequest'
+ *     responses:
+ *       200:
+ *         description: Token berhasil diperbarui
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RefreshTokenResponse'
+ *       401:
+ *         description: Refresh token tidak valid atau expired
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       400:
+ *         description: Validasi gagal
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationErrorResponse'
+ */
+router.post('/refresh-token', authController.refreshToken);
+
 module.exports = router;

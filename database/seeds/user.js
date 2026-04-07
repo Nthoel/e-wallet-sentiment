@@ -1,4 +1,4 @@
-// Plain-text passwords (for development only): Password@123
+// Plain-text password (for development only, matches BCRYPT_HASH below): password
 // Hash generated with bcrypt (10 rounds)
 const BCRYPT_HASH =
   "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi";

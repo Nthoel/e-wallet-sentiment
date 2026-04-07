@@ -46,6 +46,14 @@ const login = async credentials => {
   const accessToken = generateAccessToken(user);
   const { token: refreshToken, expiresAt } = generateRefreshToken(user);
 
+  // Update last login timestamp
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      lastLoginAt: new Date()
+    }
+  });
+
   // Hash refresh token for DB storage
   const tokenHash = crypto
     .createHash('sha256')
@@ -167,6 +175,76 @@ const verifyForgetPasswordToken = async token => {
     user_id: userToken.userId,
     type: userToken.type,
     expires_at: userToken.expiresAt
+   };
+};
+
+/**
+ * Service untuk memproses refresh token.
+ * Melakukan rotasi token: me-revoke token lama dan membuat sepasang token baru.
+ * @param {string} token - Refresh token lama
+ * @param {Object} metadata - Metadata perangkat (deviceInfo, ipAddress)
+ * @returns {Object} Pasangan access_token dan refresh_token baru
+ */
+const refreshToken = async (token, metadata = {}) => {
+  const { deviceInfo, ipAddress } = metadata;
+
+  // Hash token input untuk mencocokkan dengan tokenHash di database
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+  // Mencari refresh token di database yang belum di-revoke dan belum expired
+  const storedToken = await prisma.refreshToken.findFirst({
+    where: {
+      tokenHash,
+      isRevoked: false,
+      expiresAt: {
+        gt: new Date()
+      }
+    },
+    include: {
+      user: true
+    }
+  });
+
+  if (!storedToken) {
+    throw ApiError.unauthorized('Refresh token tidak valid atau sudah expired');
+  }
+
+  // Token Rotation: Revoke token lama
+  await prisma.refreshToken.update({
+    where: { id: storedToken.id },
+    data: {
+      isRevoked: true,
+      revokedAt: new Date()
+    }
+  });
+
+  // Generate pasangan token baru
+  const user = storedToken.user;
+  const newAccessToken = generateAccessToken(user);
+  const { token: newRefreshToken, expiresAt: newExpiresAt } =
+    generateRefreshToken(user);
+
+  // Hash refresh token baru untuk disimpan di database
+  const newTokenHash = crypto
+    .createHash('sha256')
+    .update(newRefreshToken)
+    .digest('hex');
+
+  // Simpan refresh token baru dengan metadata opsional
+  await prisma.refreshToken.create({
+    data: {
+      userId: user.id,
+      tokenHash: newTokenHash,
+      deviceInfo,
+      ipAddress,
+      isRevoked: false,
+      expiresAt: newExpiresAt
+    }
+  });
+
+  return {
+    access_token: newAccessToken,
+    refresh_token: newRefreshToken
   };
 };
 
@@ -174,5 +252,6 @@ module.exports = {
   login,
   register,
   forgetPassword,
-  verifyForgetPasswordToken
+  verifyForgetPasswordToken,
+  refreshToken
 };
