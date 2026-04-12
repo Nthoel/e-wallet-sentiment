@@ -157,6 +157,71 @@ components:
         data:
           $ref: "#/components/schemas/ProfileData"
 
+    UpdateProfileRequest:
+      type: object
+      description: Body untuk `PATCH /api/profile/me`. Minimal kirim satu field yang ingin diubah.
+      properties:
+        username:
+          type: string
+          minLength: 3
+          description: Username baru user
+          example: "admin_baru"
+        email:
+          type: string
+          format: email
+          description: Email baru user
+          example: "admin.baru@example.com"
+      minProperties: 1
+      additionalProperties: false
+
+    ProfileUpdateData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID user
+          example: "00000000-0000-0000-0000-000000000001"
+        email:
+          type: string
+          format: email
+          description: Email user setelah update
+          example: "admin.baru@example.com"
+        username:
+          type: string
+          description: Username user setelah update
+          example: "admin_baru"
+        role:
+          type: string
+          enum:
+            - ADMIN
+            - EDITOR
+            - VIEWER
+          description: Role user (read-only)
+          example: "ADMIN"
+        avatarUrl:
+          type: string
+          nullable: true
+          description: URL avatar user
+          example: "https://example.com/avatar.jpg"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Waktu profile terakhir diupdate
+          example: "2026-04-02T10:00:00.000Z"
+
+    UpdateProfileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Profile updated"
+        data:
+          $ref: "#/components/schemas/ProfileUpdateData"
+
     RefreshTokenRequest:
       type: object
       required:
@@ -187,7 +252,7 @@ components:
               type: string
               description: JWT refresh token baru (token lama telah di-revoke)
               example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-            
+
 paths:
   /api/auth/forget-password/verify-token:
     post:

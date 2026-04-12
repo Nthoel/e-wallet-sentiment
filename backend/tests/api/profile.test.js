@@ -180,3 +180,131 @@ describe('GET /api/profile/me', () => {
     });
   });
 });
+
+describe('PATCH /api/profile/me', () => {
+  test('should return 401 when Authorization header is missing', async () => {
+    const res = await request(app)
+      .patch('/api/profile/me')
+      .send({ username: 'admin_baru' })
+      .expect(401);
+
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Unauthorized: missing Authorization header'
+    });
+    expect(jwt.verify).not.toHaveBeenCalled();
+    expect(prisma.user.update).not.toHaveBeenCalled();
+  });
+
+  test('should return 400 when no updatable field is provided', async () => {
+    jwt.verify.mockReturnValue({
+      user_id: '00000000-0000-0000-0000-000000000001',
+      role: 'ADMIN'
+    });
+
+    const res = await request(app)
+      .patch('/api/profile/me')
+      .set('Authorization', 'Bearer valid.token.value')
+      .send({})
+      .expect(400);
+
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe('Validation failed');
+    expect(prisma.user.update).not.toHaveBeenCalled();
+  });
+
+  test('should return 409 when email is already registered by another user', async () => {
+    jwt.verify.mockReturnValue({
+      user_id: '00000000-0000-0000-0000-000000000001',
+      role: 'ADMIN'
+    });
+
+    prisma.user.findUnique
+      .mockResolvedValueOnce({
+        id: '00000000-0000-0000-0000-000000000001',
+        email: 'admin@example.com',
+        username: 'admin'
+      })
+      .mockResolvedValueOnce({
+        id: '00000000-0000-0000-0000-000000000099'
+      });
+
+    const res = await request(app)
+      .patch('/api/profile/me')
+      .set('Authorization', 'Bearer valid.token.value')
+      .send({ email: 'existing@example.com' })
+      .expect(409);
+
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Email already registered'
+    });
+    expect(prisma.user.update).not.toHaveBeenCalled();
+  });
+
+  test('should return 200 and update only allowed fields', async () => {
+    jwt.verify.mockReturnValue({
+      user_id: '00000000-0000-0000-0000-000000000001',
+      role: 'ADMIN'
+    });
+
+    prisma.user.findUnique
+      .mockResolvedValueOnce({
+        id: '00000000-0000-0000-0000-000000000001',
+        email: 'admin@example.com',
+        username: 'admin'
+      })
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null);
+
+    prisma.user.update.mockResolvedValue({
+      id: '00000000-0000-0000-0000-000000000001',
+      email: 'admin.baru@example.com',
+      username: 'admin_baru',
+      role: 'ADMIN',
+      avatarUrl: 'https://example.com/avatar.png',
+      updatedAt: '2026-04-02T10:00:00.000Z'
+    });
+
+    const res = await request(app)
+      .patch('/api/profile/me')
+      .set('Authorization', 'Bearer valid.token.value')
+      .send({
+        username: 'admin_baru',
+        email: 'admin.baru@example.com',
+        role: 'VIEWER',
+        passwordHash: 'should-not-be-updated',
+        isVerified: false
+      })
+      .expect(200);
+
+    expect(res.body).toEqual({
+      success: true,
+      message: 'Profile updated',
+      data: {
+        id: '00000000-0000-0000-0000-000000000001',
+        email: 'admin.baru@example.com',
+        username: 'admin_baru',
+        role: 'ADMIN',
+        avatarUrl: 'https://example.com/avatar.png',
+        updatedAt: '2026-04-02T10:00:00.000Z'
+      }
+    });
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: '00000000-0000-0000-0000-000000000001' },
+      data: {
+        email: 'admin.baru@example.com',
+        username: 'admin_baru'
+      },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        role: true,
+        avatarUrl: true,
+        updatedAt: true
+      }
+    });
+  });
+});
