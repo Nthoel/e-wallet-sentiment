@@ -16,7 +16,7 @@ const getDashboardSummaryData = async () => {
     neutral: 0
   };
 
-  let totalUlasan = await prisma.review.count();
+  const totalUlasan = await prisma.review.count();
 
   // Petakan data dari DB ke object sentimentPie
   dbResults.forEach(row => {
