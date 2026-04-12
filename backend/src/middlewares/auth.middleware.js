@@ -50,4 +50,21 @@ function authMiddleware(req, res, next) {
   }
 }
 
-module.exports = authMiddleware;
+function authorizeRole(...allowedRoles) {
+  return function (req, res, next) {
+    const userRole = req.user?.role;
+
+    if (!userRole || !allowedRoles.includes(userRole)) {
+      return res.status(STATUS_CODES.FORBIDDEN).json({
+        success: false,
+        message: 'Forbidden: Insufficient permissions. Admin role required.'
+      });
+    }
+    return next();
+  };
+}
+
+module.exports = {
+  authMiddleware,
+  authorizeRole
+};

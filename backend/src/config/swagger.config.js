@@ -45,6 +45,10 @@ const options = {
       {
         name: 'Profile',
         description: 'Manajemen profil user'
+      },
+      {
+        name: 'Admin',
+        description: 'Dashboard dan manajemen untuk admin'
       }
     ]
   },

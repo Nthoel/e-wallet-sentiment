@@ -1,0 +1,61 @@
+components:
+  schemas:
+    DashboardSummaryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Dashboard summary fetched"
+        data:
+          type: object
+          properties:
+            total_ulasan:
+              type: integer
+              example: 1200
+            sentiment_pie:
+              type: object
+              properties:
+                positive:
+                  type: integer
+                  example: 700
+                negative:
+                  type: integer
+                  example: 250
+                neutral:
+                  type: integer
+                  example: 250
+            ringkasan_sentimen:
+              type: string
+              example: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+
+paths:
+  /api/admin/dashboard/summary:
+    get:
+      tags:
+        - Admin
+      summary: Mendapatkan ringkasan dashboard untuk admin
+      description: Endpoint untuk mengambil total ulasan, komposisi sentimen, dan ringkasan sentimen (hanya untuk ADMIN).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Dashboard summary fetched
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummaryResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
