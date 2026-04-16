@@ -15,13 +15,17 @@ jest.mock('e-wallet-sentiment-database', () => ({
       update: jest.fn()
     },
     userToken: {
-      create: jest.fn()
+      create: jest.fn(),
+      findFirst: jest.fn(),
+      update: jest.fn()
     },
     refreshToken: {
       create: jest.fn(),
       findFirst: jest.fn(),
-      update: jest.fn()
-    }
+      update: jest.fn(),
+      updateMany: jest.fn()
+    },
+    $transaction: jest.fn()
   }
 }));
 
@@ -558,5 +562,65 @@ describe('POST /api/auth/refresh-token', () => {
       .expect(401);
 
     expect(res.body.message).toMatch(/tidak valid atau sudah expired/);
+  });
+});
+
+describe('POST /api/auth/reset-password', () => {
+  const mockUserToken = {
+    id: 'token-id-123',
+    userId: 'user-id-123',
+    type: 'PASSWORD_RESET',
+    tokenHash: 'hashed-token',
+    isUsed: false,
+    expiresAt: new Date(Date.now() + 10000)
+  };
+
+  test('should return 200 and success when password is reset', async () => {
+    prisma.userToken.findFirst.mockResolvedValue(mockUserToken);
+    prisma.$transaction.mockResolvedValue([]);
+    
+    const res = await request(app)
+      .post('/api/auth/reset-password')
+      .send({
+        token: 'valid-token',
+        new_password: 'PasswordBaru@123',
+        confirm_password: 'PasswordBaru@123'
+      })
+      .expect(200);
+
+    expect(res.body.success).toBe(true);
+    expect(res.body.message).toBe('Password reset berhasil');
+    
+    // Verify transaction was called
+    expect(prisma.$transaction).toHaveBeenCalled();
+  });
+
+  test('should return 400 when confirm_password does not match', async () => {
+    const res = await request(app)
+      .post('/api/auth/reset-password')
+      .send({
+        token: 'valid-token',
+        new_password: 'PasswordBaru@123',
+        confirm_password: 'MismatchPassword@123'
+      })
+      .expect(400);
+
+    // Error returned is from Zod validation mapper (format depends on your error handler)
+    expect(res.body.message).toMatch(/failed/i); // Matches ApiError.validation message
+  });
+
+  test('should return 401 when token is invalid', async () => {
+    prisma.userToken.findFirst.mockResolvedValue(null);
+
+    const res = await request(app)
+      .post('/api/auth/reset-password')
+      .send({
+        token: 'invalid-token',
+        new_password: 'PasswordBaru@123',
+        confirm_password: 'PasswordBaru@123'
+      })
+      .expect(401);
+
+    expect(res.body.message).toMatch(/invalid, expired, or already used/i);
   });
 });

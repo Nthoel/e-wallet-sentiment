@@ -71,7 +71,10 @@ const buildImageConfig = () => {
 
   const allowedMimeTypesRaw = process.env.IMAGE_ALLOWED_MIME_TYPES;
   const allowedMimeTypes = allowedMimeTypesRaw
-    ? allowedMimeTypesRaw.split(',').map(type => type.trim()).filter(Boolean)
+    ? allowedMimeTypesRaw
+      .split(',')
+      .map(type => type.trim())
+      .filter(Boolean)
     : DEFAULT_ALLOWED_MIME_TYPES;
 
   const maxFileSizeMb = toPositiveNumber(

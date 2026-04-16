@@ -73,10 +73,22 @@ const refreshTokenSchema = z.object({
   refresh_token: z.string().min(1, 'Refresh token wajib diisi')
 });
 
+const resetPasswordSchema = z
+  .object({
+    token: z.string().min(1, 'Token wajib diisi'),
+    new_password: z.string().min(MIN_PASSWORD_LENGTH, 'Password minimal 6 karakter'),
+    confirm_password: z.string().min(1, 'Konfirmasi password wajib diisi')
+  })
+  .refine(data => data.new_password === data.confirm_password, {
+    message: 'Confirm password tidak sama dengan new password',
+    path: ['confirm_password']
+  });
+
 module.exports = {
   loginSchema,
   registerSchema,
   forgetPasswordSchema,
   verifiTokenSchema,
-  refreshTokenSchema
+  refreshTokenSchema,
+  resetPasswordSchema
 };

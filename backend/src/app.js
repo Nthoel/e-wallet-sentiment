@@ -7,6 +7,7 @@ const getImageConfig = require('./config/image.config');
 const reviewRouter = require('./modules/reviews/review.router');
 const authRouter = require('./modules/auth/auth.routes');
 const profileRouter = require('./modules/profile/profile.routes');
+const adminRouter = require('./modules/admin/admin.routes');
 const app = express();
 
 const createApp = () => {
@@ -63,6 +64,9 @@ const createApp = () => {
 
   // Profile routes
   app.use('/api/profile', profileRouter);
+
+  // Admin routes
+  app.use('/api/admin', adminRouter);
 
   // Handle Error API
   app.use(errorHandleMiddleware);

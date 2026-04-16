@@ -1,0 +1,164 @@
+/* src/components/ui/Input.css */
+@import "../../styles/global.css";
+
+/* ========== WRAPPER ========== */
+.input-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-wrapper--full-width {
+  width: 100%;
+}
+
+/* ========== LABEL ========== */
+.input__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-neutral-600);
+  line-height: 12px;
+}
+
+.input__required {
+  color: var(--color-error, #ef4444);
+  margin-left: 4px;
+}
+
+/* ========== INPUT CONTAINER ========== */
+.input-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ========== BASE INPUT ========== */
+.input {
+  width: 100%;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  font-family: inherit;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  outline: none;
+  color: var(--color-neutral-600);
+}
+
+.input::placeholder {
+  color: var(--color-neutral-300);
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.input:focus:not(:disabled) {
+  color: var(--color-primary-600);
+}
+
+
+/* Full Width */
+.input--full-width {
+  width: 100%;
+}
+
+/* ========== VARIANTS ========== */
+
+/* Default Variant */
+.input--default {
+  background-color: white;
+  border: 1.5px solid var(--color-neutral-300);
+}
+
+/* Active state (hover & focus) */
+.input--default:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.input--default:focus:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+/* ========== ERROR STATE ========== */
+.input--error {
+  border-color: var(--color-error) !important;
+}
+
+.input--error:hover:not(:disabled) {
+  border-color: var(--color-error) !important;
+}
+
+.input--error:focus:not(:disabled) {
+  border-color: var(--color-error) !important;
+}
+
+/* Error + Filled variant */
+.input--filled.input--error {
+  background-color: #fef2f2;
+}
+
+/* ========== DISABLED STATE ========== */
+.input--disabled,
+.input:disabled {
+  background-color: var(--color-neutral-100, #f3f4f6);
+  border-color: var(--color-neutral-300);
+  color: var(--color-neutral-600);
+  cursor: not-allowed;
+}
+
+/* ========== ICONS ========== */
+.input__icon {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  font-size: 18px;
+  color: var(--color-neutral-400, #9ca3af);
+  pointer-events: none;
+}
+
+.input__icon--left {
+  left: 12px;
+}
+
+.input__icon--right {
+  right: 12px;
+}
+
+/* Adjust padding when icons present */
+.input-container:has(.input__icon--left) .input {
+  padding-left: 40px;
+}
+
+.input-container:has(.input__icon--right) .input {
+  padding-right: 40px;
+}
+
+/* Icon color when error */
+.input--error ~ .input__icon,
+.input-container:has(.input--error) .input__icon {
+  color: var(--color-error, #ef4444);
+}
+
+/* Icon color when success */
+.input--success ~ .input__icon,
+.input-container:has(.input--success) .input__icon {
+  color: var(--color-success, #10b981);
+}
+
+/* Icon color when disabled */
+.input--disabled ~ .input__icon,
+.input-container:has(.input--disabled) .input__icon {
+  color: var(--color-neutral-400, #9ca3af);
+}
+
+/* ========== HELPER TEXT ========== */
+.input__helper-text {
+  font-size: 14px;
+  color: var(--color-neutral-600);
+  padding: 0 12px;
+  line-height: 12px;
+}
+
+.input__helper-text--error {
+  color: var(--color-error, #ef4444);
+}

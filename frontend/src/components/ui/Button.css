@@ -1,0 +1,107 @@
+@import "../../styles/global.css";
+
+/* Base Button */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.button:focus {
+  outline: none;
+}
+
+/* Full Width */
+.button--full-width {
+  width: 100%;
+}
+
+/* ========== VARIANTS ========== */
+
+/* Primary Button */
+.button--primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.button--primary:hover:not(:disabled) {
+  background-color: var(--color-cosmic-heart-600);
+}
+
+.button--primary:focus-visible:not(:disabled) {
+  outline: 1px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+/* Transparent Button */
+.button--transparent {
+  background-color: transparent;
+  color: var(--color-primary);
+}
+
+.button--transparent:hover:not(:disabled) {
+  background-color: var(--color-primary-100);
+  color: white;
+}
+
+.button--transparent:focus-visible:not(:disabled) {
+  outline: 1px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+/* Outline Button */
+.button--outline {
+  background-color: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
+
+.button--outline:hover:not(:disabled) {
+  background-color: var(--color-primary-100);
+  border: 1px solid var(--color-cosmic-heart-600);
+  color: white;
+}
+
+.button--outline:focus-visible:not(:disabled) {
+  outline: 1px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+/* ========== DISABLED STATE ========== */
+.button--disabled,
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.button--primary:disabled {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-600);
+}
+
+.button--transparent:disabled {
+  background-color: transparent;
+  color: var(--color-neutral-600);
+}
+
+.button--outline:disabled {
+  background-color: transparent;
+  border: 1px solid var(--color-neutral-300);
+  color: var(--color-neutral-600);
+}
+
+/* Only icon (no text) */
+.button__icon:only-child {
+  margin: 0;
+}

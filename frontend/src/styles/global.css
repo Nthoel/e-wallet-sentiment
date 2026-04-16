@@ -1,0 +1,32 @@
+/* ====================================
+   DESIGN SYSTEM - COLOR TOKENS
+   ==================================== */
+:root {
+  --color-primary: #920af5;
+  --color-primary-100: #ba89ff;
+  --color-primary-600: #7e07d5;
+  --color-cosmic-heart-600: #7e07d5;
+  --color-neutral-100: #e0e1e4;
+  --color-neutral-300: #a3a8b1;
+  --color-neutral-600: #4e535d;
+  --color-error: #ff6528;
+}
+
+/* ====================================
+   GLOBAL STYLES
+   ==================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  /* Font harusnya Merriweather Sans*/
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #ffffff;
+  color: var(--color-gray-900);
+}

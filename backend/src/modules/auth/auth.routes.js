@@ -140,4 +140,40 @@ router.post('/forget-password', authController.forgetPassword);
  */
 router.post('/refresh-token', authController.refreshToken);
 
+/**
+ * @openapi
+ * /api/auth/reset-password:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Reset password menggunakan token
+ *     description: Mengubah password user menggunakan token yang didapat dari email forget password.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ResetPasswordRequest'
+ *     responses:
+ *       200:
+ *         description: Password berhasil diubah
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ResetPasswordResponse'
+ *       400:
+ *         description: Validasi gagal (mis. password tidak sama)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationErrorResponse'
+ *       401:
+ *         description: Token invalid, expired, atau sudah digunakan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post('/reset-password', authController.resetPassword);
+
 module.exports = router;

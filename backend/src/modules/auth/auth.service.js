@@ -248,10 +248,55 @@ const refreshToken = async (token, metadata = {}) => {
   };
 };
 
+/**
+ * Service untuk mereset password
+ * @param {Object} data - Objek berisi token dan new_password
+ */
+const resetPassword = async ({ token, new_password }) => {
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+  const userToken = await prisma.userToken.findFirst({
+    where: {
+      tokenHash,
+      type: 'PASSWORD_RESET'
+    }
+  });
+
+  if (!userToken || userToken.isUsed || new Date() > new Date(userToken.expiresAt)) {
+    throw ApiError.unauthorized('Token invalid, expired, or already used');
+  }
+
+  const passwordHash = await bcrypt.hash(new_password, SALT_ROUNDS);
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: userToken.userId },
+      data: { passwordHash }
+    }),
+    prisma.userToken.update({
+      where: { id: userToken.id },
+      data: { isUsed: true, usedAt: new Date() }
+    }),
+    prisma.refreshToken.updateMany({
+      where: {
+        userId: userToken.userId,
+        isRevoked: false
+      },
+      data: {
+        isRevoked: true,
+        revokedAt: new Date()
+      }
+    })
+  ]);
+
+  return { success: true, message: 'Password reset berhasil' };
+};
+
 module.exports = {
   login,
   register,
   forgetPassword,
   verifyForgetPasswordToken,
-  refreshToken
+  refreshToken,
+  resetPassword
 };

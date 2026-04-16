@@ -1,0 +1,32 @@
+components:
+  schemas:
+    DashboardSummaryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Dashboard summary fetched"
+        data:
+          type: object
+          properties:
+            total_ulasan:
+              type: integer
+              example: 1200
+            sentiment_pie:
+              type: object
+              properties:
+                positive:
+                  type: integer
+                  example: 700
+                negative:
+                  type: integer
+                  example: 250
+                neutral:
+                  type: integer
+                  example: 250
+            ringkasan_sentimen:
+              type: string
+              example: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."

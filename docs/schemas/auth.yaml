@@ -124,6 +124,38 @@ components:
               description: JWT refresh token baru (token lama telah di-revoke)
               example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - new_password
+        - confirm_password
+      properties:
+        token:
+          type: string
+          description: Token dari url email forget password
+          example: "abc123randomstring"
+        new_password:
+          type: string
+          minLength: 6
+          description: Password baru minimal 6 karakter
+          example: "PasswordBaru@123"
+        confirm_password:
+          type: string
+          minLength: 1
+          description: Konfirmasi password yang harus sama dengan new_password
+          example: "PasswordBaru@123"
+
+    ResetPasswordResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Password reset berhasil"
+
 paths:
   /api/auth/forget-password/verify-token:
     post:

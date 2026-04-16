@@ -134,10 +134,26 @@ const refreshToken = async (req, res, next) => {
   }
 };
 
+const resetPassword = async (req, res, next) => {
+  try {
+    const result = authValidation.resetPasswordSchema.safeParse(req.body);
+    if (!result.success) {
+      return next(ApiError.validation('Validation failed', result.error));
+    }
+
+    const response = await authService.resetPassword(result.data);
+
+    return res.status(STATUS_CODES.OK).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   forgetPassword,
   login,
   register,
   verifyForgetPasswordToken,
-  refreshToken
+  refreshToken,
+  resetPassword
 };
