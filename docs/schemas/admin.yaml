@@ -30,32 +30,3 @@ components:
             ringkasan_sentimen:
               type: string
               example: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-
-paths:
-  /api/admin/dashboard/summary:
-    get:
-      tags:
-        - Admin
-      summary: Mendapatkan ringkasan dashboard untuk admin
-      description: Endpoint untuk mengambil total ulasan, komposisi sentimen, dan ringkasan sentimen (hanya untuk ADMIN).
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: Dashboard summary fetched
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DashboardSummaryResponse"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"

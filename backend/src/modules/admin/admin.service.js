@@ -1,7 +1,7 @@
 const { prisma } = require('e-wallet-sentiment-database');
 
 const getDashboardSummaryData = async () => {
-  // [Checklist 2 & 3] Hitung komposisi sentiment_result dari database
+  // Hitung komposisi sentiment_result dari database
   const dbResults = await prisma.review.groupBy({
     by: ['sentiment_result'],
     _count: {
@@ -9,7 +9,7 @@ const getDashboardSummaryData = async () => {
     }
   });
 
-  // [Checklist 4] Terapkan default 0 jika kategori sentimen kosong
+  // Terapkan default 0 jika kategori sentimen kosong
   const sentimentPie = {
     positive: 0,
     negative: 0,
@@ -28,7 +28,7 @@ const getDashboardSummaryData = async () => {
     }
   });
 
-  // [Checklist 5] Isi ringkasan_sentimen dengan lorem ipsum sementara
+  // Isi ringkasan_sentimen dengan lorem ipsum sementara
   const ringkasanSentimen =
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
 

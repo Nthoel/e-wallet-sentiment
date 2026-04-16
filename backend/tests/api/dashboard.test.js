@@ -17,8 +17,8 @@ jest.mock('jsonwebtoken');
 
 describe('Admin Dashboard API', () => {
   let app;
-  let adminToken = 'valid-admin-token';
-  let userToken = 'valid-user-token';
+  const adminToken = 'valid-admin-token';
+  const userToken = 'valid-user-token';
 
   beforeAll(() => {
     app = createApp();
@@ -27,20 +27,24 @@ describe('Admin Dashboard API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    jwt.verify.mockImplementation((token) => {
-      if (token === adminToken) return { id: 'admin-id', role: 'ADMIN' };
-      if (token === userToken) return { id: 'user-id', role: 'VIEWER' };
+    jwt.verify.mockImplementation(token => {
+      if (token === adminToken) {
+        return { id: 'admin-id', role: 'ADMIN' };
+      }
+      if (token === userToken) {
+        return { id: 'user-id', role: 'VIEWER' };
+      }
       throw new Error('Invalid token');
     });
   });
 
   describe('GET /api/admin/dashboard/summary', () => {
-    it('should return 401 if token is missing', async () => {
+    test('should return 401 if token is missing', async () => {
       const res = await request(app).get('/api/admin/dashboard/summary');
       expect(res.statusCode).toEqual(401);
     });
 
-    it('should return 403 if user is not an ADMIN', async () => {
+    test('should return 403 if user is not an ADMIN', async () => {
       const res = await request(app)
         .get('/api/admin/dashboard/summary')
         .set('Authorization', `Bearer ${userToken}`);
@@ -48,7 +52,7 @@ describe('Admin Dashboard API', () => {
       expect(res.statusCode).toEqual(403);
     });
 
-    it('should return 200 and correct dashboard data structure (populated data)', async () => {
+    test('should return 200 and correct dashboard data structure (populated data)', async () => {
       prisma.review.count.mockResolvedValue(1200);
       prisma.review.groupBy.mockResolvedValue([
         { sentiment_result: 'positive', _count: { sentiment_result: 700 } },
@@ -69,7 +73,7 @@ describe('Admin Dashboard API', () => {
       expect(typeof res.body.data.ringkasan_sentimen).toBe('string');
     });
 
-    it('should have default 0 for empty sentiment categories', async () => {
+    test('should have default 0 for empty sentiment categories', async () => {
       prisma.review.count.mockResolvedValue(0);
       prisma.review.groupBy.mockResolvedValue([]);
 
